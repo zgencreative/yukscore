@@ -1,0 +1,1325 @@
+body {
+    font-family: "Inter";
+    background-color: #121212;
+    font-size: 14px;
+}
+.navbar-dark {
+    background-color: #121212; /* Warna latar hitam */
+}
+.navbar-brand img {
+    height: 40px;
+}
+.nav-link {
+    color: #fff;
+    margin-right: 15px;
+}
+.nav-link:hover {
+    color: #ff9800; /* Warna hover */
+}
+.btn-signin {
+    background-color: #9a9a9a;
+    color: #fff;
+    border: none;
+}
+.btn-signin:hover {
+    color: #fff;
+    background-color: #5b5b5b;
+}
+.btn-signup {
+    background-color: #ff5500;
+    color: #fff;
+    border: none;
+}
+.btn-signup:hover {
+    color: #fff;
+    background-color: #b53c00;
+}
+
+.button-container {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 20px;
+    white-space: nowrap;
+}
+
+.button-container::-webkit-scrollbar {
+    display: none;
+}
+
+.circle-button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: rgba(
+        255,
+        69,
+        0,
+        0.1
+    ); /* Warna oranye dengan transparansi 50% */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    border: none;
+    display: flex;
+    /* justify-content: center; */
+    align-items: center;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    /* position: relative; */
+    flex-shrink: 0;
+    color: white;
+    cursor: pointer;
+}
+
+.icon img {
+    height: 40px;
+    width: 40px;
+    font-size: 25px;
+    line-height: 60px;
+    object-fit: cover; /* Menjaga proporsi gambar */
+    border-radius: 50%; /* Membuat gambar berbentuk lingkaran */
+    transition: all 0.3s ease;
+}
+
+.circle-button span {
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: normal; /* Membolehkan teks membungkus */
+    word-wrap: break-word; /* Memastikan teks panjang dapat pecah */
+    text-align: left; /* Sesuaikan dengan tampilan */
+}
+
+.circle-button:hover,
+.circle-button.active {
+    width: 220px;
+    border-radius: 30px;
+    background: radial-gradient(circle, #fc5000, #e42008, #e42008);
+}
+
+.circle-button:hover span,
+.circle-button.active span {
+    opacity: 1;
+    margin-left: 10px;
+}
+
+.scrollable-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem; /* Jarak antar kartu */
+    padding: 1rem;
+}
+
+.scrollable-container::-webkit-scrollbar {
+    display: none;
+}
+
+.card {
+    position: relative;
+    background: url("/img/Rectangle_4539.png") no-repeat;
+    background-size: cover; /* Membuat gambar menutupi seluruh elemen */
+    width: 200px; /* Control the card width */
+    height: 300px; /* Tentukan tinggi card */
+    flex: 0 0 auto;
+    transition: all 0.3s ease; /* Transisi halus */
+    overflow: hidden; /* Agar pseudo-element tidak keluar dari area card */
+}
+
+.card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0); /* Tidak ada transparansi awal */
+    transition: background 0.3s ease; /* Transisi untuk latar belakang */
+    pointer-events: none; /* Agar pseudo-element tidak mengganggu interaksi dengan elemen di atasnya */
+}
+
+.card:hover::after {
+    background: rgba(
+        0,
+        0,
+        0,
+        0.2
+    ); /* Menambahkan transparansi pada background */
+}
+
+.card-header {
+    color: white;
+}
+
+.card-body {
+    color: white;
+    border-bottom-right-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+}
+
+.team-logos img {
+    height: 50px;
+    margin: 0 10px;
+}
+
+.team-name {
+    word-wrap: break-word; /* Untuk browser lama */
+    overflow-wrap: break-word; /* Standar modern */
+    white-space: normal; /* Izinkan teks untuk membungkus */
+    text-align: left;
+}
+
+.team-score img {
+    filter: brightness(0) invert(1);
+    cursor: pointer;
+}
+
+.star-container {
+    display: inline-block;
+    cursor: pointer;
+    width: 25px; /* Sesuaikan ukuran bintang */
+    height: 25px;
+    position: relative;
+}
+
+.star {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Agar sesuai dengan kontainer */
+    transition: opacity 0.3s ease; /* Animasi transisi */
+}
+
+.star-container .default {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.star-container .filled {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.star-container.active .default {
+    opacity: 0;
+}
+
+.star-container.active .filled {
+    opacity: 1;
+}
+
+.divider {
+    height: 2px;
+    background: #f90;
+    margin: 10px 0;
+}
+
+.match-info {
+    font-size: 0.9rem;
+    color: white;
+}
+
+.score {
+    font-weight: bold;
+    text-align: center;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #212529; /* Dark background */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.calendar-card {
+    background-color: #ff5500; /* Orange background */
+    color: white;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column; /* Menyusun konten secara vertikal */
+    justify-content: center; /* Menyelaraskan konten secara vertikal di tengah */
+    align-items: center; /* Menyelaraskan konten secara horizontal di tengah */
+    text-align: center; /* Membuat teks tetap rata tengah */
+    padding: 10px 0;
+    font-weight: bold;
+    width: 120px;
+    height: 60px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.calendar-card:hover {
+    transform: scale(1.05);
+}
+
+.calendar-card.active {
+    background-color: white; /* Highlight selected day */
+    color: #ff5500;
+}
+
+.calendar-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: center; /* Center the grid */
+}
+.calendar-icon {
+    width: 40px;
+    height: 40px;
+    background: url("https://img.icons8.com/ios-filled/50/000000/calendar--v1.png")
+        no-repeat center center;
+    background-size: cover;
+    cursor: pointer;
+}
+#calendar-input {
+    display: none; /* Hide the input field */
+}
+#leftCard:hover {
+    background: #070707;
+    border-radius: 0.375rem;
+    cursor: pointer;
+}
+.progress-bar-orange {
+    width: 50px;
+    height: 5px;
+    background-color: #ff5500; /* Warna titik */
+}
+.progress-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.dot {
+    width: 15px;
+    height: 5px;
+    background-color: white; /* Warna titik */
+    border-radius: 50%;
+}
+.show-all {
+    color: gray;
+    margin-left: auto;
+    font-size: 14px; /* Ukuran teks */
+    cursor: pointer;
+}
+.show-all:hover {
+    color: #ff5500;
+}
+
+.match-header {
+    background: url("/img/match_header.png") no-repeat center center; /* Masukkan URL gambar */
+    background-size: cover; /* Gambar akan memenuhi seluruh elemen */
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-around; /* Spasi di antara logo kiri, tengah, dan kanan */
+    align-items: center; /* Sejajarkan logo dan teks secara vertikal */
+    color: white; /* Warna teks */
+    padding: 10px 50px;
+}
+
+.team {
+    display: flex;
+    flex-direction: column; /* Membuat gambar dan nama tim vertikal */
+    align-items: center; /* Memusatkan elemen (gambar & teks) */
+}
+
+/* Gambar logo */
+.team-logo {
+    width: 55px; /* Ukuran logo */
+    height: auto; /* Menjaga rasio gambar */
+    margin-bottom: 5px; /* Spasi antara logo dan teks */
+}
+
+.detail-name {
+    text-align: center; /* Teks berada di tengah */
+    font-size: 14px; /* Ukuran font */
+    font-weight: 500;
+}
+
+.detail-info {
+    text-align: center;
+}
+
+.detail-time {
+    font-size: 15px;
+}
+
+.detail-status {
+    font-size: 15px; /* Ukuran font status */
+    font-style: italic; /* Italic untuk status */
+}
+
+/* Container utama untuk menu */
+.menu-bar {
+    display: flex;
+    justify-content: space-between; /* Spasi antara menu kiri dan ikon kanan */
+    align-items: center; /* Agar item sejajar secara vertikal */
+    padding: 10px 20px; /* Ruang di dalam menu */
+    color: white; /* Warna teks */
+    border-bottom: 1px solid #444; /* Garis bawah */
+}
+
+/* Container untuk menu item */
+.menu-items {
+    display: flex;
+    gap: 20px; /* Jarak antar item menu */
+}
+
+/* Gaya untuk tautan menu */
+.menu-link {
+    text-decoration: none; /* Hilangkan garis bawah */
+    color: white; /* Warna teks */
+    font-size: 14px; /* Ukuran font */
+    font-weight: bold; /* Teks tebal */
+    text-transform: uppercase; /* Semua huruf besar */
+    padding: 5px 0; /* Spasi atas dan bawah untuk klik */
+    cursor: pointer;
+}
+
+/* Tautan aktif */
+.menu-link.active {
+    color: #ff5500; /* Garis bawah untuk tautan aktif */
+}
+
+/* Ikon di sebelah kanan */
+.menu-icons {
+    display: flex;
+    align-items: center; /* Pusatkan ikon secara vertikal */
+    font-size: 20px; /* Ukuran ikon */
+}
+
+.icon-placeholder {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.dot-white {
+    height: 10px;
+    background-color: #929292; /* Warna titik */
+}
+
+.dot-orange {
+    height: 10px;
+    background-color: #ff5500; /* Warna titik */
+}
+
+.field-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.field-image {
+    width: 100%;
+    height: 700px;
+}
+
+.player {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Shadow ditambahkan */
+}
+
+.team1 {
+    background-color: #ff7733;
+}
+
+.team2 {
+    background-color: #070707;
+}
+
+.name-team {
+    position: absolute;
+    font-size: 12px;
+}
+
+.player-name {
+    position: absolute;
+    top: 30px;
+    font-size: 12px;
+    color: white;
+    text-align: center;
+    white-space: nowrap; /* Nama tetap dalam satu baris */
+    max-width: 70px; /* Maksimal lebar nama pemain */
+    text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Shadow teks nama pemain */
+}
+
+.substitution {
+    color: white; /* Teks putih */
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+.subs {
+    width: 45%; /* Lebar untuk masing-masing tim */
+    height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+.subs-time {
+    display: flex; /* Aktifkan Flexbox */
+    justify-content: center; /* Pusatkan teks secara horizontal */
+    align-items: center; /* Pusatkan teks secara vertikal */
+    text-align: center; /* Pastikan teks terpusat dalam elemen */
+    width: 50px;
+    height: 100%;
+    font-weight: bold;
+    color: white; /* Tambahkan agar teks terlihat lebih jelas */
+}
+
+table {
+    width: 100%;
+    /* border: 1px solid #929292;
+  border-radius: 10px; */
+    outline: 2px solid #929292; /* Gunakan outline untuk border luar */
+    border-radius: 10px;
+}
+table thead th {
+    color: #929292;
+    padding: 10px;
+    text-align: left;
+    border-bottom-width: 1px;
+    font-size: 16px;
+    font-weight: 200;
+}
+table tbody td {
+    color: #929292;
+    padding: 10px;
+    text-align: left;
+    border-bottom-width: 1px;
+    font-size: 16px;
+    font-weight: 200;
+}
+
+.custom-padding {
+    padding: 0 20px;
+}
+
+.btn-matches {
+    color: white;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+}
+
+.btn-group.active {
+    background-color: white;
+}
+
+.title-detail {
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 12px;
+}
+
+.background-container {
+    width: 100%;
+    height: 100%;
+    background-image: url("/img/match_header.png");
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    justify-content: center;
+}
+
+.match-details {
+    flex-direction: column;
+    line-height: normal;
+    justify-content: center;
+    padding: 12px;
+    align-items: center;
+}
+
+.match-info-detail {
+    font-family: Inter, sans-serif;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.match-date {
+    color: var(--Foundation-White-white-50, #fff);
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+.teams-container {
+    align-items: center;
+    font-size: 10px;
+    line-height: 24px;
+    justify-content: center;
+    flex-direction: row;
+}
+.team-info {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 30%;
+}
+.team-nameMatch {
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+}
+.match-time {
+    font-size: 24px;
+    font-weight: bold;
+}
+.page {
+    display: none;
+}
+.page.active {
+    display: block;
+}
+.status-match {
+    font-size: 14px;
+    color: white;
+    font-weight: lighter;
+}
+.name-team-detail {
+    font-size: 14px;
+    color: white;
+    font-weight: 200;
+}
+.score-form {
+    font-size: 14px;
+    color: white;
+    font-weight: 200;
+}
+.card-form {
+    background-color: #414141;
+    border-radius: 6px;
+    padding: 12px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
+}
+.info-form {
+    align-items: center;
+    display: flex;
+    gap: 19px;
+    height: 100%;
+}
+.info-teamForm {
+    justify-content: space-between;
+}
+.info-teamForm .team1-detail {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.info-teamForm .team2-detail {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+}
+.team-penalti {
+    background-color: #b5b5b5;
+    color: white;
+    border-radius: 4px;
+    padding: 2px;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 300;
+}
+.seeAll-button {
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    background: var(--Foundation-Primary-primary-500, #f50);
+    background-color: var(--Foundation-Primary-primary-500, #f50);
+    display: flex;
+    margin-top: 8px;
+    width: 100%;
+    gap: 7px;
+    font-size: 16px;
+    color: var(--Foundation-White-white-50, #fff);
+    line-height: 40px;
+    padding: 0 10px;
+    cursor: pointer;
+    border: none;
+}
+.seeAll-button:hover {
+    color: #fff;
+    background-color: #b53c00;
+}
+
+.dots {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: red; /* Ganti warna sesuai kebutuhan */
+    display: inline-block;
+    margin-right: 5px;
+}
+
+/* Styling for the dropdown */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    background-color: #212529;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown-content {
+    display: none;
+    border-radius: 10px;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+    border-radius: 10px;
+}
+
+/* Show the dropdown menu */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Styling for the modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close-btn {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.title-league-detailTeamMatch {
+    color: white;
+    font-size: 14px;
+    font-weight: 200;
+}
+.section-league-detailTeamMatch {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+}
+.namePlayer-statsDetailTeam {
+    color: white;
+    font-weight: bold;
+}
+.cardListStat {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #929292;
+    justify-content: space-between;
+    padding: 6px 16px 6px 12px;
+    font-size: 12px;
+}
+.containerListStat {
+    width: 100%;
+    /* border: 1px solid #929292;
+  border-radius: 10px; */
+    outline: 1px solid #929292; /* Gunakan outline untuk border luar */
+    border-radius: 10px;
+    margin-top: 12px;
+}
+.button-matchesDetailTeam {
+    align-self: stretch;
+    border-radius: 61px;
+    background: var(--Foundation-Primary-primary-500, rgb(255, 255, 255));
+    background-color: var(--Foundation-Primary-primary-500, rgb(255, 255, 255));
+    color: var(--Foundation-White-white-50, rgb(0, 0, 0));
+    white-space: nowrap;
+    font: 500 16px/40px Inter, sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s ease;
+    min-width: 120px;
+    height: 46px;
+}
+.button-matchesDetailTeam.active {
+    align-self: stretch;
+    border-radius: 61px;
+    background: var(--Foundation-Primary-primary-500, #f50);
+    background-color: var(--Foundation-Primary-primary-500, #f50);
+    color: var(--Foundation-White-white-50, #fff);
+    white-space: nowrap;
+    font: 500 16px/40px Inter, sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s ease;
+    min-width: 120px;
+    height: 46px;
+}
+
+.button-matchesDetailTeam:hover {
+    background-color: var(--Foundation-Primary-primary-600, #ec5200);
+}
+
+.result-button-matchesDetailTeam:hover {
+    background-color: var(--Foundation-Primary-primary-600, #b4b4b4);
+}
+
+.border-column {
+    border-left: 1px solid #929292;
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+    width: 7%; /* Kolom keempat (Rank) */
+}
+
+th:nth-child(3),
+td:nth-child(3) {
+    width: 7%; /* Kolom keempat (Rank) */
+}
+
+th:nth-child(4),
+td:nth-child(4) {
+    width: 7%; /* Kolom keempat (Rank) */
+}
+
+/* Menghapus garis bawah pada setiap baris */
+.no-border-bottom td,
+.no-border-bottom th {
+    border-bottom: none;
+}
+
+.teks-tengah {
+    text-align: center;
+}
+
+/* Kelas umum untuk tombol lingkaran */
+.rounded-btn {
+    width: 25px; /* Ukuran tombol */
+    height: 25px; /* Ukuran tombol agar berbentuk lingkaran */
+    border-radius: 50%; /* Membuat tombol menjadi lingkaran */
+    padding: 0; /* Menghilangkan padding agar gambar pas dengan ukuran tombol */
+    background-color: rgba(
+        245,
+        245,
+        245,
+        0.774
+    ); /* Warna latar belakang tombol */
+    border: none; /* Menghilangkan border */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.rounded-btn img {
+    width: 100%; /* Ukuran gambar dalam tombol */
+    height: auto; /* Menjaga rasio gambar */
+}
+
+.rounded-btn:hover {
+    background-color: white;
+}
+
+.component-1 {
+    width: 100%;
+    position: relative;
+    height: 282px;
+    text-align: left;
+    font-size: 10px;
+    color: #fff;
+    font-family: Inter;
+}
+.live-wrapper {
+    width: 35.9px;
+    border-radius: 2px;
+    background-color: #ff5500;
+    height: 17px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 7px;
+    box-sizing: border-box;
+}
+.live {
+    position: relative;
+    line-height: 9px;
+}
+.frame-group {
+    position: absolute;
+    height: 28.72%;
+    width: 86.95%;
+    top: 19.15%;
+    right: 6.14%;
+    bottom: 52.13%;
+    left: 6.91%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 4px;
+    font-size: 16px;
+}
+.chelsea-fcsvg-parent {
+    align-self: stretch;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+}
+.chelsea-fcsvg-icon {
+    width: 50px;
+    position: relative;
+    object-fit: cover;
+}
+.vs {
+    position: relative;
+    line-height: 22px;
+    font-weight: 600;
+}
+.frame-container {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 3px;
+    font-size: 10px;
+}
+.nd-round {
+    position: relative;
+    line-height: 14px;
+    font-weight: 600;
+}
+.nd-round-parent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+}
+.frame-child {
+    width: 163px;
+    position: relative;
+    max-height: 100%;
+}
+
+.spacing-line {
+    height: 2px;
+    background-color: #ff5500;
+    width: 163px;
+    margin: 1rem 0;
+}
+
+.frame-div {
+    width: 163px;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 12px;
+}
+.chelsea {
+    position: relative;
+    line-height: 14px;
+}
+.button-primary {
+    position: absolute;
+    height: 8.16%;
+    width: 87.15%;
+    top: 86.98%;
+    right: 6.47%;
+    bottom: 8.87%;
+    left: 6.38%;
+    border-radius: 4px;
+    background-color: #ff5500;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    box-sizing: border-box;
+}
+
+.group-child {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0%;
+    right: 0%;
+    bottom: 0%;
+    left: 0%;
+    max-width: 100%;
+    overflow: hidden;
+    max-height: 100%;
+}
+.group-item {
+    top: 195%;
+    position: absolute;
+    bottom: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    max-height: 100%;
+}
+.image-container {
+    width: 50px;
+    height: 50px;
+    border-radius: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Mencegah gambar keluar dari div */
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+}
+
+#NavSm {
+    display: none;
+}
+
+/* Default: Semua kolom tampil di desktop */
+th,
+td {
+    display: table-cell;
+}
+
+.bg-dark-1 {
+    background-color: #222121;
+}
+
+.highlighted td {
+    font-weight: bold;
+}
+
+.news .card {
+    height: var(--bs-card-height);
+    width: fit-content;
+    background-color: var(--bs-card-bg);
+    background: var(--bs-card-bg);
+}
+
+.news .card:hover {
+    background-color: #ff5500;
+}
+
+.news .card .card-body {
+    color: var(--bs-body-color);
+}
+
+.news .card-title {
+    color: white;
+}
+
+.news .card-text {
+    color: white;
+}
+
+.news a .title {
+    text-decoration: none;
+    color: white;
+}
+
+.news .title {
+    text-decoration: none;
+    color: white;
+}
+
+.news a:hover {
+    text-decoration: none;
+    color: #ff5500;
+}
+
+.news a {
+    text-decoration: none;
+}
+
+.news a:hover {
+    text-decoration: none;
+    color: #ff5500;
+}
+
+.news a {
+    text-decoration: none;
+}
+
+.news a:hover {
+    text-decoration: none;
+    color: #ff5500;
+}
+
+.news a {
+    text-decoration: none;
+}
+
+.news a:hover {
+    text-decoration: none;
+    color: #ff5500;
+}
+
+.info {
+    margin-bottom: 3rem;
+}
+
+.info .card {
+    height: var(--bs-card-height);
+    width: auto;
+    background-color: var(--bs-card-bg);
+    background: var(--bs-card-bg);
+}
+
+.modall {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 999;
+}
+.modall.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+}
+.modall .modall-dialog {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease-in-out;
+}
+.modall.show .modall-dialog {
+    transform: translateY(0);
+}
+
+.win .team-name {
+    font-size: 16px;
+}
+
+.win .draw {
+    width: 68px;
+    height: 68px;
+}
+
+.win .draw h6 {
+    align-items: center;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.progress-container {
+    position: relative;
+    width: 100%;
+    margin-top: 35px;
+}
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-align: center;
+}
+.progress-label {
+    flex: 1;
+    text-align: center;
+}
+.progress {
+    height: 15px;
+}
+
+.bg-orange {
+    background-color: #ff5500;
+}
+
+#clickDiv {
+    cursor: pointer;
+}
+
+.next-match {
+    cursor: pointer;
+}
+
+/* Container untuk spinner yang melayang */
+.loading-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999; /* Agar spinner tetap di atas */
+    display: none; /* Awalnya disembunyikan */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Overlay latar belakang */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparan */
+    z-index: 9998; /* Di belakang spinner */
+    display: none;
+}
+
+/* Mobile: Hanya TEAM, P, GD, dan PTS yang ditampilkan */
+@media screen and (max-width: 768px) {
+    .col-rank,
+    .col-w,
+    .col-d,
+    .col-l,
+    .col-f,
+    .col-a {
+        display: none;
+    }
+}
+
+@media (max-width: 720px) {
+    #NavSm {
+        display: block;
+    }
+    #nav-large {
+        display: none;
+    }
+    .search-icon {
+        display: block; /* Menampilkan ikon pencarian pada layar kecil */
+    }
+    .hide-on-mobile {
+        display: none;
+    }
+    .menu-link {
+        font-size: 10px;
+        text-align: center;
+    }
+    .menu-items {
+        gap: 10px;
+    }
+    .subs {
+        font-size: 10px;
+    }
+    .subs-time {
+        width: 25px;
+        height: 25px;
+    }
+    .title-sub-squad-detailTeam {
+        font-size: 12px;
+    }
+    #team-name {
+        font-size: 14px;
+    }
+    #region-team {
+        font-size: 12px;
+    }
+    .button-matchesDetailTeam {
+        font-size: 12px;
+        min-width: 110px;
+        height: 36px;
+        padding: 0;
+    }
+    .button-matchesDetailTeam.active {
+        font-size: 12px;
+        min-width: 110px;
+        height: 36px;
+        padding: 0;
+    }
+    table thead th {
+        color: #929292;
+        padding: 10px;
+        text-align: left;
+        border-bottom-width: 1px;
+        font-size: 14px;
+        font-weight: 200;
+    }
+    table tbody td {
+        color: #929292;
+        padding: 10px;
+        text-align: left;
+        border-bottom-width: 1px;
+        font-size: 11px;
+        font-weight: 200;
+    }
+    .truncate-text {
+        max-width: 100px; /* Lebih kecil di layar mobile */
+    }
+}
+/* Menyembunyikan ikon pencarian pada layar lebih besar dari 991px */
+@media (min-width: 721px) {
+    .search-icon {
+        display: none; /* Menyembunyikan ikon pencarian pada layar besar (desktop) */
+    }
+}
+@media (max-width: 991px) {
+    .hide-on-mobile {
+        display: none;
+    }
+}
