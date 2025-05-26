@@ -921,53 +921,57 @@ class ApiController extends Controller
         }
 
         // Handle Next Event
-        $event = $resNextData['Event'];
-        $form = $resNextData['Form'];
-        $team1 = $event['T1'][0];
-        $team2 = $event['T2'][0];
+        $event = $resNextData['Event'] ?? null;
+        $form = $resNextData['Form'] ?? null;
+        $data['NextEvent'] = null;
 
-        $team1Last = collect($form['T1'][0]['EL'] ?? [])->map(function ($match) use ($form) {
-            $isTeam1 = $match['T1'][0]['ID'] == $form['T1'][0]['ID'];
-            $score1 = $match['Tr1'];
-            $score2 = $match['Tr2'];
-            return $score1 > $score2 ? ($isTeam1 ? 1 : 2) :
-                   ($score1 < $score2 ? ($isTeam1 ? 2 : 1) : 3);
-        });
+        if($event){
+            $team1 = $event['T1'][0];
+            $team2 = $event['T2'][0];
 
-        $team2Last = collect($form['T2'][0]['EL'] ?? [])->map(function ($match) use ($form) {
-            $isTeam2 = $match['T2'][0]['ID'] == $form['T2'][0]['ID'];
-            $score1 = $match['Tr1'];
-            $score2 = $match['Tr2'];
-            return $score2 > $score1 ? ($isTeam2 ? 1 : 2) :
-                   ($score2 < $score1 ? ($isTeam2 ? 2 : 1) : 3);
-        });
+            $team1Last = collect($form['T1'][0]['EL'] ?? [])->map(function ($match) use ($form) {
+                $isTeam1 = $match['T1'][0]['ID'] == $form['T1'][0]['ID'];
+                $score1 = $match['Tr1'];
+                $score2 = $match['Tr2'];
+                return $score1 > $score2 ? ($isTeam1 ? 1 : 2) :
+                    ($score1 < $score2 ? ($isTeam1 ? 2 : 1) : 3);
+            });
 
-        // Format waktu dari Esd
-        $timeStr = strval($event['Esd']);
-        $carbonTime = Carbon::createFromFormat('YmdHis', $timeStr, 'UTC')->setTimezone('Asia/Bangkok');
-        $formattedTime = $carbonTime->format('YmdHis');
+            $team2Last = collect($form['T2'][0]['EL'] ?? [])->map(function ($match) use ($form) {
+                $isTeam2 = $match['T2'][0]['ID'] == $form['T2'][0]['ID'];
+                $score1 = $match['Tr1'];
+                $score2 = $match['Tr2'];
+                return $score2 > $score1 ? ($isTeam2 ? 1 : 2) :
+                    ($score2 < $score1 ? ($isTeam2 ? 2 : 1) : 3);
+            });
 
-        $data['NextEvent'] = [
-            'matchID' => $event['Eid'],
-            'time_start' => $formattedTime,
-            'team1' => [
-                'teamNM' => $team1['Nm'],
-                'teamID' => $team1['ID'],
-                'teamIMG' => isset($team1['Img']) ? $imgTeam . $team1['Img'] : '/img/default_team.png',
-                'CoNm' => $team1['CoNm'] ?? '',
-                'CoId' => $team1['CoId'] ?? '',
-                'lastMt' => $team1Last->toArray()
-            ],
-            'team2' => [
-                'teamNM' => $team2['Nm'],
-                'teamID' => $team2['ID'],
-                'teamIMG' => isset($team2['Img']) ? $imgTeam . $team2['Img'] : '/img/default_team.png',
-                'CoNm' => $team2['CoNm'] ?? '',
-                'CoId' => $team2['CoId'] ?? '',
-                'lastMt' => $team2Last->toArray()
-            ],
-            'urlComp' => "{$event['Stg']['Ccd']}.{$event['Stg']['Scd']}"
-        ];
+            // Format waktu dari Esd
+            $timeStr = strval($event['Esd']);
+            $carbonTime = Carbon::createFromFormat('YmdHis', $timeStr, 'UTC')->setTimezone('Asia/Bangkok');
+            $formattedTime = $carbonTime->format('YmdHis');
+
+            $data['NextEvent'] = [
+                'matchID' => $event['Eid'],
+                'time_start' => $formattedTime,
+                'team1' => [
+                    'teamNM' => $team1['Nm'],
+                    'teamID' => $team1['ID'],
+                    'teamIMG' => isset($team1['Img']) ? $imgTeam . $team1['Img'] : '/img/default_team.png',
+                    'CoNm' => $team1['CoNm'] ?? '',
+                    'CoId' => $team1['CoId'] ?? '',
+                    'lastMt' => $team1Last->toArray()
+                ],
+                'team2' => [
+                    'teamNM' => $team2['Nm'],
+                    'teamID' => $team2['ID'],
+                    'teamIMG' => isset($team2['Img']) ? $imgTeam . $team2['Img'] : '/img/default_team.png',
+                    'CoNm' => $team2['CoNm'] ?? '',
+                    'CoId' => $team2['CoId'] ?? '',
+                    'lastMt' => $team2Last->toArray()
+                ],
+                'urlComp' => "{$event['Stg']['Ccd']}.{$event['Stg']['Scd']}"
+            ];
+        }
 
         return response()->json([
             'code' => 200,
