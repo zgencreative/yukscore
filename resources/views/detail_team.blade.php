@@ -464,96 +464,98 @@
           let currentCompetitionFilter = "all";  // Variabel untuk menyimpan kompetisi yang aktif
           let currentMatchType = "fixtures";  // Variabel untuk menyimpan jenis pertandingan yang ditampilkan (fixtures atau results)
 
-          // Format tanggal dan waktu
-          let date = formatTimestamp(data.data.NextEvent.time_start);
-          let words = date.split("-");
 
-          // Membuat elemen untuk match berikutnya
-          const nextMatch = document.createElement("div");
-          nextMatch.classList.add("next-match");
-          nextMatch.innerHTML = `
-            <div class="title-detail">NEXT MATCH</div>
-            <div class="background-container" id="next-match">
-              <div class="match-details">
-                <div class="match-info-detail">
-                  <div class="match-date">${words[0]}</div>
-                  <div class="match-time-wrapper">
-                    <div class="teams-container">
-                      <div style="display: flex; align-items: center; justify-content: center;">
-                        <div class="team-info" id="team1-info">
-                          <img
-                            loading="lazy"
-                            src="${data.data.NextEvent.team1.teamIMG}"
-                            alt="${data.data.NextEvent.team1.teamNM}"
-                            class="team-badge"
-                            style="width: 50px; height: 50px"
-                          />
-                          <div class="team-nameMatch">${data.data.NextEvent.team1.teamNM}</div>
-                        </div>
-                        <div class="match-time">${words[1]}</div>
-                        <div class="team-info" id="team2-info">
-                          <img
-                            loading="lazy"
-                            src="${data.data.NextEvent.team2.teamIMG}"
-                            alt="${data.data.NextEvent.team2.teamNM}"
-                            class="team-badge"
-                          />
-                          <div class="team-nameMatch">${data.data.NextEvent.team2.teamNM}</div>
+          if(data.data.NextEvent != null){
+            // Format tanggal dan waktu
+            let date = formatTimestamp(data.data.NextEvent.time_start);
+            let words = date.split("-");
+
+            // Membuat elemen untuk match berikutnya
+            const nextMatch = document.createElement("div");
+            nextMatch.classList.add("next-match");
+            nextMatch.innerHTML = `
+              <div class="title-detail">NEXT MATCH</div>
+              <div class="background-container" id="next-match">
+                <div class="match-details">
+                  <div class="match-info-detail">
+                    <div class="match-date">${words[0]}</div>
+                    <div class="match-time-wrapper">
+                      <div class="teams-container">
+                        <div style="display: flex; align-items: center; justify-content: center;">
+                          <div class="team-info" id="team1-info">
+                            <img
+                              loading="lazy"
+                              src="${data.data.NextEvent.team1.teamIMG}"
+                              alt="${data.data.NextEvent.team1.teamNM}"
+                              class="team-badge"
+                              style="width: 50px; height: 50px"
+                            />
+                            <div class="team-nameMatch">${data.data.NextEvent.team1.teamNM}</div>
+                          </div>
+                          <div class="match-time">${words[1]}</div>
+                          <div class="team-info" id="team2-info">
+                            <img
+                              loading="lazy"
+                              src="${data.data.NextEvent.team2.teamIMG}"
+                              alt="${data.data.NextEvent.team2.teamNM}"
+                              class="team-badge"
+                            />
+                            <div class="team-nameMatch">${data.data.NextEvent.team2.teamNM}</div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          `;
-          container.appendChild(nextMatch);
-          console.log(data.data);
-          let cardNext = document.getElementById("next-match");
-          cardNext.addEventListener("click", () => {
-            let urlcomp = data.data.NextEvent.urlComp.replace('.','/');
-            window.location.href = `/match/${urlcomp}/${data.data.NextEvent.matchID}`; // Gunakan data.url sebagai target URL
-          });
+            `;
+            container.appendChild(nextMatch);
+            let cardNext = document.getElementById("next-match");
+            cardNext.addEventListener("click", () => {
+              let urlcomp = data.data.NextEvent.urlComp.replace('.','/');
+              window.location.href = `/match/${urlcomp}/${data.data.NextEvent.matchID}`; // Gunakan data.url sebagai target URL
+            });
 
-          // Mengambil elemen untuk team 1
-          const team1 = document.getElementById("team1-info");
-          const team2 = document.getElementById("team2-info")
-          const info1 = document.createElement("div");
-          const info2 = document.createElement("div");
+            // Mengambil elemen untuk team 1
+            const team1 = document.getElementById("team1-info");
+            const team2 = document.getElementById("team2-info")
+            const info1 = document.createElement("div");
+            const info2 = document.createElement("div");
 
-          // Looping melalui lastMt untuk menambahkan status
-          for (let i = data.data.NextEvent.team1.lastMt.length - 1; i >= 0; i--) {
-            const matchResult = data.data.NextEvent.team1.lastMt[i];
-            let dotColor = "#929292";  // Default warna abu-abu
+            // Looping melalui lastMt untuk menambahkan status
+            for (let i = data.data.NextEvent.team1.lastMt.length - 1; i >= 0; i--) {
+              const matchResult = data.data.NextEvent.team1.lastMt[i];
+              let dotColor = "#929292";  // Default warna abu-abu
 
-            if (matchResult == 1) {
-              dotColor = "#01c246";  // Hijau untuk kemenangan
-            } else if (matchResult == 2) {
-              dotColor = "#d5020d";  // Merah untuk kekalahan
+              if (matchResult == 1) {
+                dotColor = "#01c246";  // Hijau untuk kemenangan
+              } else if (matchResult == 2) {
+                dotColor = "#d5020d";  // Merah untuk kekalahan
+              }
+
+              info1.innerHTML += `<span class="dots" style="background-color: ${dotColor}"></span>`;
             }
 
-            info1.innerHTML += `<span class="dots" style="background-color: ${dotColor}"></span>`;
-          }
+            // Menambahkan info1 ke dalam team1
+            team1.appendChild(info1);
 
-          // Menambahkan info1 ke dalam team1
-          team1.appendChild(info1);
+            // Looping melalui lastMt untuk menambahkan status
+            for (let i = data.data.NextEvent.team2.lastMt.length - 1; i >= 0; i--) {
+              const matchResult = data.data.NextEvent.team2.lastMt[i];
+              let dotColor = "#929292";  // Default warna abu-abu
 
-          // Looping melalui lastMt untuk menambahkan status
-          for (let i = data.data.NextEvent.team2.lastMt.length - 1; i >= 0; i--) {
-            const matchResult = data.data.NextEvent.team2.lastMt[i];
-            let dotColor = "#929292";  // Default warna abu-abu
+              if (matchResult == 1) {
+                dotColor = "#01c246";  // Hijau untuk kemenangan
+              } else if (matchResult == 2) {
+                dotColor = "#d5020d";  // Merah untuk kekalahan
+              }
 
-            if (matchResult == 1) {
-              dotColor = "#01c246";  // Hijau untuk kemenangan
-            } else if (matchResult == 2) {
-              dotColor = "#d5020d";  // Merah untuk kekalahan
+              info2.innerHTML += `<span class="dots" style="background-color: ${dotColor}"></span>`;
             }
 
-            info2.innerHTML += `<span class="dots" style="background-color: ${dotColor}"></span>`;
+            // Menambahkan info1 ke dalam team1
+            team2.appendChild(info2);
           }
-
-          // Menambahkan info1 ke dalam team1
-          team2.appendChild(info2);
 
           // Menambahkan tombol "FIXTURES" dan "RESULTS"
           const buttonSection = document.createElement("div");
