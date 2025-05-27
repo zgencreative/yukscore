@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.templates')
 
 @section('extra_head')
 <link
