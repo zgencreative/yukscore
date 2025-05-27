@@ -175,11 +175,11 @@ class ApiController extends Controller
         }
 
         $index_data = $response;
-        $liga_tertentu = [
-            '18173', '18418', '18176', '18420', '18227', '20106', '18483',
-            '18546', '17004', '19232', '19243', '19244', '20222', '18181', '18599',
-            '18307', '20510', '18213', '20202', '18179', '18822'
-        ];
+        // $liga_tertentu = [
+        //     '18173', '18418', '18176', '18420', '18227', '20106', '18483',
+        //     '18546', '17004', '19232', '19243', '19244', '20222', '18181', '18599',
+        //     '18307', '20510', '18213', '20202', '18179', '18822'
+        // ];
 
         $sorted_data = [
             'live'     => [],
@@ -190,9 +190,9 @@ class ApiController extends Controller
         foreach ($index_data['data'] as $match) {
             $events = $match['Events'] ?? [];
 
-            if (!in_array($match['Sid'], $liga_tertentu)) {
-                continue;
-            }
+            // if (!in_array($match['Sid'], $liga_tertentu)) {
+            //     continue;
+            // }
 
             $live_events = [];
             $previous_events = [];
