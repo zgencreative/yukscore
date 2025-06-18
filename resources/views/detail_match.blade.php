@@ -70,78 +70,97 @@
 
         <!-- Dynamic Content Section -->
         <div class="container mt-4" id="dinamic-content">
-          @if (!empty($data['data']['timeline']))
-            @foreach ($data['data']['timeline'] as $half => $events)
-              @php $scores = [0, 0]; @endphp
+            @if (!empty($data['data']['timeline']))
+                @foreach ($data['data']['timeline'] as $half => $events)
+                    
+                    {{-- Inisialisasi variabel untuk menyimpan skor terakhir yang valid di setiap babak --}}
+                    @php $last_valid_scores = [0, 0]; @endphp
 
-              @foreach ($events as $event)
-                @if (!empty($event['score']))
-                  @php $scores = $event['score']; @endphp
-                @endif
-                <div class="py-2 text-white {{ $event['team'] == 1 ? 'text-start' : 'text-end' }}">
-                  <div class="col-12">
-                    @if ($event['team'] == 1)
-                      @if ($half != '4') <span>{{ $event['min'] }}'</span> @endif
-                      <small>
-                        @if (!empty($event['score']) && $event['player'][0]['info'] == 'goal' && count($event['player']) > 1)
-                          ({{ $event['player'][1]['pn'] }})
+                    @foreach ($events as $event)
+                        
+                        {{-- Perbarui skor terakhir HANYA JIKA skor baru yang valid ditemukan --}}
+                        @if (isset($event['score'][1])) {{-- Pengecekan yang lebih aman --}}
+                            @php $last_valid_scores = $event['score']; @endphp
                         @endif
-                        <b>{{ $event['player'][0]['pn'] }}</b>
-                      </small>
-                      <span class="p-1">
-                        @include('partials.event_icon', ['player' => $event['player'][0]])
-                      </span>
-                      @if (!empty($event['score']))
-                        <center>{{ $scores[0] }} - {{ $scores[1] }}</center>
-                      @endif
-                    @else
-                      @if (!empty($event['score']))
-                        <center>{{ $scores[0] }} - {{ $scores[1] }}</center>
-                      @endif
-                      <span class="p-1">
-                        @include('partials.event_icon', ['player' => $event['player'][0]])
-                      </span>
-                      <small>
-                        <b>{{ $event['player'][0]['pn'] }}</b>
-                        @if (!empty($event['score']) && $event['player'][0]['info'] == 'goal' && count($event['player']) > 1)
-                          ({{ $event['player'][1]['pn'] }})
-                        @endif
-                      </small>
-                      @if ($half != '4')
-                        @if ($event['minex'] != 0)
-                          <span>{{ $event['min'] }}+{{ $event['minex'] }}'</span>
-                        @else
-                          <span>{{ $event['min'] }}'</span>
-                        @endif
-                      @endif
-                    @endif
-                  </div>
-                </div>
-              @endforeach
 
-              <!-- Penutup Babak -->
-              <div class="p-2 d-flex justify-content-between bg-secondary rounded text-white">
-                <span>
-                  @switch($half)
-                    @case('1') HT @break
-                    @case('2') FT @break
-                    @case('3') AET @break
-                    @case('4') PEN @break
-                    @default {{ $half }}th Half
-                  @endswitch
-                </span>
-                <span>{{ $scores[0] }} - {{ $scores[1] }}</span>
-              </div>
-            @endforeach
-          @else
-            <div class="info">
-              <div class="card bg-black border-2 border-secondary-subtle">
-                <div class="card-body">
-                  <h4 class="text-center fw-semibold">No Data</h4>
+                        {{-- Wadah utama dengan class 'event-row' yang menggunakan Flexbox --}}
+                        <div class="event-row">
+
+                            {{-- KOLOM KIRI: Akan diisi jika pencetak gol dari tim 1 --}}
+                            <div class="event-left">
+                                @if ($event['team'] == 1)
+                                    @if ($half != '4') <span class="me-2">{{ $event['min'] }}'</span> @endif
+                                    <span class="p-1">
+                                        @include('partials.event_icon', ['player' => $event['player'][0]])
+                                    </span>
+                                    <small>
+                                        <b>{{ $event['player'][0]['pn'] }}</b>
+                                        {{-- Gunakan pengecekan yang sama di sini --}}
+                                        @if (isset($event['score'][1]) && $event['player'][0]['info'] == 'goal' && count($event['player']) > 1)
+                                            ({{ $event['player'][1]['pn'] }})
+                                        @endif
+                                    </small>
+                                @endif
+                            </div>
+
+                            {{-- KOLOM TENGAH: Hanya tampilkan skor jika event ini adalah gol dengan data skor yang valid --}}
+                            <div class="event-center">
+                                @if (isset($event['score'][1])) {{-- Pengecekan yang lebih aman --}}
+                                    <span>{{ $event['score'][0] }} - {{ $event['score'][1] }}</span>
+                                @endif
+                            </div>
+
+                            {{-- KOLOM KANAN: Akan diisi jika pencetak gol dari tim 2 --}}
+                            <div class="event-right">
+                                @if ($event['team'] != 1)
+                                    <small>
+                                        {{-- Gunakan pengecekan yang sama di sini --}}
+                                        @if (isset($event['score'][1]) && $event['player'][0]['info'] == 'goal' && count($event['player']) > 1)
+                                            ({{ $event['player'][1]['pn'] }})
+                                        @endif
+                                        <b>{{ $event['player'][0]['pn'] }}</b>
+                                    </small>
+                                    <span class="p-1">
+                                        @include('partials.event_icon', ['player' => $event['player'][0]])
+                                    </span>
+                                    @if ($half != '4')
+                                        @if ($event['minex'] != 0)
+                                            <span class="ms-2">{{ $event['min'] }}+{{ $event['minex'] }}'</span>
+                                        @else
+                                            <span class="ms-2">{{ $event['min'] }}'</span>
+                                        @endif
+                                    @endif
+                                @endif
+                            </div>
+                            
+                        </div>
+                    @endforeach
+
+                    {{-- Penutup Babak (Menggunakan skor valid terakhir) --}}
+                    <div class="p-2 d-flex justify-content-between bg-secondary rounded text-white mt-3">
+                        <span>
+                            @switch($half)
+                                @case('1') Half Time @break
+                                @case('2') Full Time @break
+                                @case('3') After Extra Time @break
+                                @case('4') Penalties @break
+                                @default {{ $half }}th Half
+                            @endswitch
+                        </span>
+                        {{-- Variabel $last_valid_scores dijamin aman karena diinisialisasi sebagai [0,0] --}}
+                        <span>{{ $last_valid_scores[0] }} - {{ $last_valid_scores[1] }}</span>
+                    </div>
+
+                @endforeach
+            @else
+                <div class="info mt-3">
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-body">
+                            <h4 class="text-center fw-semibold text-white-50">No Timeline Data Available</h4>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          @endif
+            @endif
         </div>
       </div>
     </div>

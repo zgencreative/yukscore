@@ -2170,7 +2170,7 @@ async function fetchSortedData(dateParam = null) {
                 // Jika data adalah elemen ke-0, tambahkan kelas 'active'
                 if (index === 0) {
                     button.classList.add("active");
-                    displayCategory(category, 0, category.urlComp);
+                    displayCategory("live", category, 0, category.urlComp);
                 }
 
                 button.innerHTML = `
@@ -2196,7 +2196,7 @@ async function fetchSortedData(dateParam = null) {
                     button.classList.add("active");
 
                     // Panggil fungsi untuk menampilkan data kategori
-                    displayCategory(category, 0, category.urlComp);
+                    displayCategory("live", category, 0, category.urlComp);
                 });
 
                 buttonContainerLive.appendChild(button);
@@ -2219,7 +2219,7 @@ async function fetchSortedData(dateParam = null) {
                 // Jika data adalah elemen ke-0, tambahkan kelas 'active'
                 if (index === 0) {
                     button.classList.add("active");
-                    displayCategory(category, 1, category.urlComp);
+                    displayCategory("next", category, 1, category.urlComp);
                 }
 
                 button.innerHTML = `
@@ -2245,7 +2245,7 @@ async function fetchSortedData(dateParam = null) {
                     button.classList.add("active");
 
                     // Panggil fungsi untuk menampilkan data kategori
-                    displayCategory(category, 1, category.urlComp);
+                    displayCategory("next", category, 1, category.urlComp);
                 });
 
                 buttonContainerNext.appendChild(button);
@@ -2269,7 +2269,7 @@ async function fetchSortedData(dateParam = null) {
                 // Jika data adalah elemen ke-0, tambahkan kelas 'active'
                 if (index === 0) {
                     button.classList.add("active");
-                    displayCategory(category, 2, category.urlComp);
+                    displayCategory("prev", category, 2, category.urlComp);
                 }
 
                 button.innerHTML = `
@@ -2295,7 +2295,7 @@ async function fetchSortedData(dateParam = null) {
                     button.classList.add("active");
 
                     // Panggil fungsi untuk menampilkan data kategori
-                    displayCategory(category, 2, category.urlComp);
+                    displayCategory("prev", category, 2, category.urlComp);
                 });
 
                 buttonContainerPrevious.appendChild(button);
@@ -2577,7 +2577,7 @@ function displayAll(category, index, urlComp) {
     }
 }
 
-function displayCategory(category, index, urlComp) {
+function displayCategory(type, category, index, urlComp) {
     // Ambil elemen container tempat card akan ditempatkan
     const scrollableContainer = document.getElementsByClassName(
         "scrollable-container"
@@ -2612,59 +2612,67 @@ function displayCategory(category, index, urlComp) {
             }
 
             card.innerHTML = `
-              <div class="component-1">
-                <div class="d-flex justify-content-between ms-3 me-3 py-3">
-                  <div class="live-wrapper">
-                      <b class="live">${data.Status_Match}</b>
-                  </div>
-                  <span class="team-score">
-                    <div class="star-container" onclick="toggleStar(this)">
-                      <img src="/img/star_border.png" class="star default" alt="Star Border">
-                      <img src="/img/star.png" class="star filled" alt="Star Filled">
+                <div class="component-1">
+                    <div class="d-flex justify-content-between ms-3 me-3 py-3">
+                        <div class="live-wrapper">
+                            <b class="live">${data.Status_Match}</b>
+                        </div>
+                        <span class="team-score">
+                            <div class="star-container" onclick="toggleStar(this)">
+                                <img src="/img/star_border.png" class="star default" alt="Star Border">
+                                <img src="/img/star.png" class="star filled" alt="Star Filled">
+                            </div>
+                        </span>
                     </div>
-                  </span>
-                </div>
-                <div class="frame-group">
-                  <div class="chelsea-fcsvg-parent">
-                    <div class="image-container">
-                      <img src="${data.Team1.IMGTeam}" alt="${
+                    <div class="frame-group">
+                        <div class="chelsea-fcsvg-parent">
+                            <div class="image-container">
+                                <img src="${data.Team1.IMGTeam}" alt="${
                 data.Team1.NMTeam
             }" />
-                    </div>
-                    <i class="vs">VS</i>
-                    <div class="image-container">
-                      <img src="${data.Team2.IMGTeam}" alt="${
+                            </div>
+                            <i class="vs">VS</i>
+                            <div class="image-container">
+                                <img src="${data.Team2.IMGTeam}" alt="${
                 data.Team2.NMTeam
             }" />
+                            </div>
+                        </div>
+                        <div class="frame-container">
+                            <div class="nd-round-parent">
+                                <i class="nd-round"></i>
+                                <i class="nd-round"></i>
+                            </div>
+                            <div class="spacing-line"></div>
+                        </div>
+                        <div class="frame-div">
+                            <div class="d-flex justify-content-between">
+                                <div class="chelsea">${data.Team1.NMTeam}</div>
+                                ${score1Html}
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <div class="chelsea">${data.Team2.NMTeam}</div>
+                                ${score2Html}
+                            </div>
+                            <img class="group-item" alt="" src="/img/Line 244.png">
+                        </div>
                     </div>
-                      
-                  </div>
-                  <div class="frame-container">
-                      <div class="nd-round-parent">
-                        <i class="nd-round"></i>
-                        <i class="nd-round"></i>
-                      </div>
-                      <div class="spacing-line" ></div>
-                  </div>
-                  <div class="frame-div">
-                    <div class="d-flex justify-content-between">
-                        <div class="chelsea">${data.Team1.NMTeam}</div>
-                        ${score1Html}
+                    <div class="button-primary">
+                        ${
+                            data.has_live_url
+                                ? // Jika true, panggil goToLive dengan 'data.IDMatch'
+                                  `<b href="#" onclick="goToLive(event, '${data.IDMatch}')" class="button blinking-live">
+                                LIVE NOW!!
+                            </b>`
+                                : // Jika false, tampilkan waktu
+                                  `<b class="button">
+                                <img alt="" src="/img/calendar_card.png"> 
+                                ${formatTimestamp(data.time_start)}
+                            </b>`
+                        }
                     </div>
-                    <div class="d-flex justify-content-between">
-                        <div class="chelsea">${data.Team2.NMTeam}</div>
-                        ${score2Html}
-                    </div>
-                    <img class="group-item" alt="" src="/img/Line 244.png">
-                  </div>
                 </div>
-                <div class="button-primary">
-                    <b class="button"><img alt="" src="/img/calendar_card.png"> ${formatTimestamp(
-                        data.time_start
-                    )}</b>
-                </div>
-              </div>
-          `;
+            `;
 
             // Tambahkan event listener untuk mengarahkan ke URL
             card.addEventListener("click", () => {
@@ -2872,4 +2880,17 @@ function timeAgo(dateString) {
         }
     }
     return "Just now";
+}
+
+function goToLive(event, matchId) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (!matchId) {
+        console.error("ID Pertandingan tidak tersedia.");
+        return;
+    }
+
+    // Arahkan browser ke halaman stream dengan ID pertandingan
+    window.location.href = `/stream/${matchId}`;
 }
