@@ -163,8 +163,29 @@ class ApiController extends Controller
 
     public function sortedData($date = null)
     {
+        // Variabel untuk menyimpan data, default-nya array kosong
+        $scheduleData = [];
+
         if (!$date) {
             $date = now()->format('Ymd');
+            
+        }
+
+        // URL API yang akan di-request
+        $proxyBaseUrl = config('services.stream_proxy.base_url');
+
+        // 2. Gabungkan dengan path endpoint yang spesifik
+        $apiUrl = "{$proxyBaseUrl}/schedule";
+        
+        // Melakukan request GET ke URL
+        $response = Http::get($apiUrl);
+
+        // Memeriksa apakah request berhasil (status code 2xx)
+        if ($response->successful()) {
+            // ✅ Berhasil: Ambil response JSON dan simpan ke variabel
+            // Metode .json() secara otomatis mengubah JSON menjadi array PHP
+            $scheduleData = $response->json();
+
         }
 
         // Panggil method footballByDate namun sebagai fungsi, bukan response JSON
@@ -200,7 +221,7 @@ class ApiController extends Controller
 
             foreach ($events as $event) {
                 $status = $event['Status_Match'] ?? '';
-                if (in_array($status, ['FT', 'AP', 'AET', 'Aband.', 'AW'])) {
+                if (in_array($status, ['FT', 'AP', 'AET', 'Aband.', 'AW', 'ToFi'])) {
                     $previous_events[] = $event;
                 } elseif (in_array($status, ['NS', 'Postp.', 'Canc.'])) {
                     $next_events[] = $event;
@@ -223,10 +244,51 @@ class ApiController extends Controller
                 'badgeUrl' => $match['badgeUrl'] ?? '',
             ];
 
+            $scheduleLookup = [];
+            if (!empty($scheduleData) && is_array($scheduleData)) {
+                foreach ($scheduleData as $scheduleEvent) {
+                    // Pastikan key 'id_match' ada
+                    if (isset($scheduleEvent['id_match'])) {
+                        // Key: ID Pertandingan, Value: Array berisi link HLS
+                        $scheduleLookup[$scheduleEvent['id_match']] = $scheduleEvent['hls_streams'];
+                    }
+                }
+            }
+
+
+            // --- Langkah 2: Looping pada $live_events dan Tambahkan Key 'hls_url' ---
+
+            // Gunakan '&' pada $event agar kita bisa memodifikasi array aslinya secara langsung
+            foreach ($live_events as &$event) {
+                // Ambil IDMatch dari event saat ini
+                $matchId = $event['IDMatch'];
+
+                // Variabel penanda default-nya adalah false
+                $hasStreams = false;
+
+                // Cek apakah IDMatch ini ada di peta pencarian kita
+                if (isset($scheduleLookup[$matchId])) {
+                    // Jika ada, cek apakah array hls_streams-nya tidak kosong
+                    if (!empty($scheduleLookup[$matchId])) {
+                        $hasStreams = true;
+                    }
+                }
+                
+                // Tambahkan key baru 'has_live_url' dengan nilai true atau false
+                $event['has_live_url'] = $hasStreams;
+            }
+            // Praktik terbaik: Hapus referensi setelah loop selesai
+            unset($event);
+
+
+            // --- Langkah 3: Sekarang $live_events sudah diperbarui ---
+            // Anda bisa melanjutkan sisa kode Anda
             if (!empty($live_events)) {
+                // Sekarang $live_events sudah berisi key 'hls_url' yang baru
                 $match_data['events'] = $live_events;
                 $sorted_data['live'][] = $match_data;
             }
+
 
             if (!empty($previous_events)) {
                 $match_data['events'] = $previous_events;

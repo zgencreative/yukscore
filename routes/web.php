@@ -7,6 +7,8 @@ use App\Http\Controllers\ApiController;
 use App\Http\Controllers\DetailMatchController;
 use App\Http\Controllers\DetailCompController;
 use App\Http\Controllers\DetailTeamController;
+use App\Http\Controllers\StreamController;
+use App\Http\Controllers\ChatController;
 
 Route::get('/', [HomeController::class, 'index'])->name('index');;
 
@@ -15,6 +17,10 @@ Route::get('/match/{country}/{comp}/{idMatch}', [DetailMatchController::class, '
 Route::get('/comp/{country}/{comp}', [DetailCompController::class, 'show'])->name('comp.detail');
 
 Route::get('/team/{idTeam}', [DetailTeamController::class, 'show'])->name('team.detail');
+
+Route::get('/stream/{matchId}', [StreamController::class, 'playById'])->name('stream.play');
+
+Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
 
 //BACKEND API
 

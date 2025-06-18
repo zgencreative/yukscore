@@ -1232,6 +1232,79 @@ td {
     display: none;
 }
 
+/*
+ * Definisikan animasi kedipan bernama 'blink-effect'
+ * Animasi ini akan mengubah warna teks dari merah ke putih lalu kembali ke merah.
+ */
+@keyframes blink-effect {
+    0% {
+        color: #ff3838; /* Merah terang di awal */
+        text-shadow: 0 0 5px rgba(255, 56, 56, 0.7);
+    }
+    50% {
+        color: #ffffff; /* Putih di tengah animasi */
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+        color: #ff3838; /* Kembali ke merah untuk loop yang mulus */
+        text-shadow: 0 0 5px rgba(255, 56, 56, 0.7);
+    }
+}
+
+/*
+ * Buat sebuah class baru untuk menerapkan animasi ini.
+ * Ini lebih baik daripada mengubah class 'button' yang mungkin dipakai di tempat lain.
+ */
+.blinking-live {
+    animation: blink-effect 1.5s linear infinite;
+    font-weight: bold;
+    font-size: 1.1em; /* Sedikit lebih besar agar menonjol */
+}
+
+/*
+ * Wadah utama untuk setiap baris event, menggunakan Flexbox.
+ */
+/* Anda akan menemukan kode seperti ini */
+.event-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 8px 0;
+}
+
+/*
+ * Tiga "kolom" di dalam baris.
+ * flex: 1; membuat kolom kiri dan kanan fleksibel mengisi sisa ruang.
+ */
+.event-row .event-left,
+.event-row .event-right {
+    flex: 1; /* Ambil sisa ruang yang tersedia */
+    display: flex; /* Gunakan flex juga di sini untuk merapikan ikon dan teks */
+    align-items: center;
+}
+
+/* Kolom kiri meratakan itemnya ke kiri */
+.event-row .event-left {
+    justify-content: flex-start;
+}
+
+/* Kolom kanan meratakan itemnya ke kanan */
+.event-row .event-right {
+    justify-content: flex-end;
+}
+
+/*
+ * Kolom tengah untuk skor.
+ * flex-shrink: 0; mencegahnya menyusut jika tidak ada ruang.
+ */
+.event-row .event-center {
+    flex-shrink: 0;
+    padding: 0 15px; /* Beri jarak kiri-kanan pada skor */
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
 /* Mobile: Hanya TEAM, P, GD, dan PTS yang ditampilkan */
 @media screen and (max-width: 768px) {
     .col-rank,
