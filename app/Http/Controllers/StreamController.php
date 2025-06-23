@@ -3,15 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http; // Gunakan HTTP Client
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class StreamController extends Controller
 {
-    /**
-     * Menampilkan halaman pemutar video berdasarkan ID Pertandingan.
-     * Data diambil secara real-time dari API schedule.
-     */
     public function playById(Request $request, $matchId)
     {
         // Ambil base URL API dari file konfigurasi .env
@@ -24,8 +20,8 @@ class StreamController extends Controller
         $scheduleApiUrl = "{$proxyBaseUrl}/schedule";
 
         try {
-            // Lakukan request ke API schedule
-            $response = Http::get($scheduleApiUrl);
+            // Lakukan request ke API schedule dengan timeout
+            $response = Http::timeout(15)->get($scheduleApiUrl);
 
             // Jika request gagal, tampilkan error
             if ($response->failed()) {
@@ -37,18 +33,23 @@ class StreamController extends Controller
             // Gunakan Laravel Collection untuk mencari data dengan mudah dan efisien
             $event = collect($scheduleData)->firstWhere('id_match', $matchId);
 
-            // Jika event tidak ditemukan atau tidak punya stream, tampilkan error
-            if (!$event || empty($event['hls_streams'])) {
+            // --- PERUBAHAN LOGIKA ---
+            // Abort jika event tidak ditemukan, ATAU jika kedua jenis stream (hls DAN iframe) kosong.
+            if (!$event || (empty($event['hls_streams']) && empty($event['iframe_streams']))) {
                 abort(404, 'Stream untuk pertandingan ini tidak ditemukan atau tidak tersedia.');
             }
 
-            // Ambil array hls_streams dan nama pertandingan
-            $hlsStreams = $event['hls_streams'];
+            // --- PERUBAHAN PENGAMBILAN DATA ---
+            // Ambil array hls_streams dan iframe_streams. Gunakan '?? []' sebagai fallback jika key tidak ada.
+            $hlsStreams = $event['hls_streams'] ?? [];
+            $iframeStreams = $event['iframe_streams'] ?? []; // Tambahkan ini
             $matchName = $event['match_name'];
             
-            // Kirim array stream dan nama pertandingan ke view
+            // --- PERUBAHAN DATA YANG DIKIRIM KE VIEW ---
+            // Kirim semua data yang relevan ke view
             return view('stream', [
                 'hlsStreams' => $hlsStreams,
+                'iframeStreams' => $iframeStreams, // Tambahkan ini
                 'matchName' => $matchName,
                 'proxyBaseUrl' => $proxyBaseUrl
             ]);
