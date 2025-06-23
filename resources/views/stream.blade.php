@@ -20,6 +20,7 @@
             color: #fff; /* Pastikan warna sesuai dengan template Anda */
         }
         .video-wrapper {
+            position: relative;
             width: 100%;
             max-width: 900px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
@@ -27,17 +28,37 @@
             overflow: hidden;
             border: 2px solid rgba(255, 255, 255, 0.1);
             background-color: #000;
+            /* Memberi aspek rasio 16:9 pada wrapper */
+            padding-top: 56.25%;
         }
-        .video-js {
+        /* Style untuk kedua player (video dan iframe) agar responsif */
+        .video-js, .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 500px;
+            height: 100%;
+            border: none;
+        }
+        .controls-group {
+            width: 100%;
+            max-width: 900px;
+            margin-top: 1rem;
+            padding: 10px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background-color: rgba(30, 41, 59, 0.5);
+        }
+        .controls-group h4 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: #cbd5e1;
+            font-weight: normal;
         }
         .server-buttons {
-            margin-top: 1rem;
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
-            justify-content: center;
         }
         .server-btn {
             background-color: #334155;
@@ -47,7 +68,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, border-color 0.3s;
         }
         .server-btn:hover {
             background-color: #475569;
@@ -55,12 +76,10 @@
         .server-btn.active {
             background-color: #1e40af;
             border-color: #2563eb;
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
         }
-        @media (max-width: 768px) {
-            .video-js {
-                height: auto;
-                min-height: 280px;
-            }
+        .hidden {
+            display: none !important;
         }
     </style>
 @endsection
@@ -74,19 +93,49 @@
         {{-- Judul Pertandingan --}}
         <h1 class="video-title">🎥 {{ $matchName ?? 'Live Stream' }}</h1>
 
-        {{-- Wrapper untuk Video Player --}}
+        {{-- Wrapper untuk Video Player, kini berisi HLS dan iframe --}}
         <div class="video-wrapper">
-            <video id="hls-player" class="video-js vjs-default-skin" controls preload="auto"></video>
+            <video id="hls-player" class="video-js vjs-default-skin"></video>
+            <iframe id="iframe-player" class="hidden" allow="encrypted-media" allowfullscreen="true" scrolling="no"></iframe>
         </div>
 
-        {{-- Tombol Pilihan Server (hanya muncul jika ada lebih dari 1 stream) --}}
-        @if (!empty($hlsStreams) && count($hlsStreams) > 1)
-            <div class="server-buttons">
-                @foreach ($hlsStreams as $index => $streamUrl)
-                    <button class="server-btn {{ $loop->first ? 'active' : '' }}" onclick="changeStream(this, '{{ $streamUrl }}')">
-                        Server {{ $index + 1 }}
-                    </button>
-                @endforeach
+        {{-- Grup Kontrol --}}
+        {{-- 1. Tombol Tipe Player (HLS/iframe) --}}
+        @if (!empty($hlsStreams) && !empty($iframeStreams))
+            <div class="controls-group" id="player-type-controls">
+                <h4>Tipe Player</h4>
+                <div class="server-buttons">
+                    <button class="server-btn" data-player-type="hls">Player HLS</button>
+                    <button class="server-btn" data-player-type="iframe">Player iframe</button>
+                </div>
+            </div>
+        @endif
+
+        {{-- 2. Tombol Server HLS --}}
+        @if (!empty($hlsStreams))
+            <div class="controls-group" id="hls-server-controls">
+                <h4>Server HLS</h4>
+                <div class="server-buttons">
+                    @foreach ($hlsStreams as $index => $streamUrl)
+                        <button class="server-btn" data-src="{{ $streamUrl }}">
+                            Server {{ $index + 1 }}
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        {{-- 3. Tombol Server iframe --}}
+        @if (!empty($iframeStreams))
+            <div class="controls-group hidden" id="iframe-server-controls">
+                <h4>Server iframe</h4>
+                <div class="server-buttons">
+                    @foreach ($iframeStreams as $index => $streamUrl)
+                        <button class="server-btn" data-src="{{ $streamUrl }}">
+                            Server {{ $index + 1 }}
+                        </button>
+                    @endforeach
+                </div>
             </div>
         @endif
         
@@ -100,68 +149,133 @@
     <script src="https://vjs.zencdn.net/8.11.8/video.min.js"></script>
 
     <script>
-        let player;
-
-        // Jadikan `changeStream` fungsi global agar bisa diakses oleh atribut onclick
-        window.changeStream = function(buttonElement, originalUrl) {
-            if (player) {
-                const proxyBaseUrl = window.myApp.proxyUrl;
-
-                if (!proxyBaseUrl) {
-                    console.error("Proxy URL tidak terdefinisi.");
-                    return;
-                }
-
-                const proxiedUrl = `${proxyBaseUrl}/hls?url=${encodeURIComponent(originalUrl)}`;
-                console.log("Mengganti stream ke (via proxy):", proxiedUrl);
-                
-                player.src({
-                    src: proxiedUrl,
-                    type: 'application/x-mpegURL'
-                });
-
-                document.querySelectorAll('.server-btn').forEach(btn => btn.classList.remove('active'));
-                buttonElement.classList.add('active');
-            }
-        }
-
-        // Jalankan kode setelah seluruh halaman dimuat
         document.addEventListener('DOMContentLoaded', function() {
-            try {
-                // Ambil data dari Controller Laravel
-                const originalStreamUrls = @json($hlsStreams ?? []);
-                // Simpan proxy URL di objek window agar bisa diakses oleh changeStream
-                window.myApp = {
-                    proxyUrl: @json($proxyBaseUrl ?? '')
-                };
-                
-                if (originalStreamUrls.length === 0 || !window.myApp.proxyUrl) {
-                    console.error("Data stream atau proxy URL tidak tersedia untuk memulai player.");
-                    const videoContainer = document.querySelector('.video-wrapper');
-                    if(videoContainer) {
-                        videoContainer.innerHTML = '<p style="text-align:center; padding: 40px; color: #ffcccc;">Stream tidak dapat dimuat.</p>';
-                    }
-                    return;
-                }
+            // --- Konfigurasi Awal ---
+            const hlsStreams = @json($hlsStreams ?? []);
+            const iframeStreams = @json($iframeStreams ?? []);
+            const proxyBaseUrl = @json($proxyBaseUrl ?? '');
 
-                const initialProxiedUrl = `${window.myApp.proxyUrl}/hls?url=${encodeURIComponent(originalStreamUrls[0])}`;
+            // --- Seleksi Elemen DOM ---
+            const videoPlayer = document.getElementById('hls-player');
+            const iframePlayer = document.getElementById('iframe-player');
+            const playerTypeControls = document.getElementById('player-type-controls');
+            const hlsServerControls = document.getElementById('hls-server-controls');
+            const iframeServerControls = document.getElementById('iframe-server-controls');
 
-                const playerOptions = {
+            // Cek apakah ada stream yang tersedia
+            if (hlsStreams.length === 0 && iframeStreams.length === 0) {
+                document.querySelector('.video-wrapper').innerHTML = '<p style="text-align:center; padding: 40px; color: #ffcccc;">Stream tidak ditemukan untuk pertandingan ini.</p>';
+                return;
+            }
+
+            // Inisialisasi Video.js Player hanya jika ada stream HLS
+            let player;
+            if (hlsStreams.length > 0) {
+                player = videojs(videoPlayer, {
                     autoplay: true,
                     controls: true,
                     responsive: true,
-                    fluid: true,
-                    sources: [{
-                        src: initialProxiedUrl,
-                        type: 'application/x-mpegURL'
-                    }]
-                };
+                });
+            } else {
+                // Jika tidak ada HLS, sembunyikan player video
+                videoPlayer.style.display = 'none';
+            }
 
-                // Inisialisasi player
-                player = videojs('hls-player', playerOptions);
 
-            } catch (e) {
-                console.error("Terjadi error saat inisialisasi player:", e);
+            // --- FUNGSI-FUNGSI UTAMA ---
+
+            // Fungsi untuk memuat stream HLS ke Video.js
+            function loadHlsStream(url) {
+                if (!player) return;
+                const proxiedUrl = `${proxyBaseUrl}/hls?url=${encodeURIComponent(url)}`;
+                console.log("Memuat HLS Stream:", proxiedUrl);
+                player.src({ src: proxiedUrl, type: 'application/x-mpegURL' });
+            }
+
+            // Fungsi untuk memuat URL ke dalam iframe
+            function loadIframeStream(url) {
+                console.log("Memuat iframe Stream:", url);
+                iframePlayer.src = url;
+            }
+
+            // Fungsi untuk mengganti tampilan player
+            function switchPlayerView(playerType) {
+                if (playerType === 'hls') {
+                    videoPlayer.classList.remove('hidden');
+                    iframePlayer.classList.add('hidden');
+                    hlsServerControls.classList.remove('hidden');
+                    iframeServerControls.classList.add('hidden');
+                } else if (playerType === 'iframe') {
+                    videoPlayer.classList.add('hidden');
+                    iframePlayer.classList.remove('hidden');
+                    hlsServerControls.classList.add('hidden');
+                    iframeServerControls.classList.remove('hidden');
+                }
+            }
+
+
+            // --- EVENT LISTENERS ---
+
+            // Listener untuk tombol Tipe Player
+            if (playerTypeControls) {
+                playerTypeControls.addEventListener('click', (e) => {
+                    const button = e.target.closest('button');
+                    if (!button) return;
+
+                    const playerType = button.dataset.playerType;
+                    switchPlayerView(playerType);
+
+                    // Update 'active' state
+                    playerTypeControls.querySelectorAll('.server-btn').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                });
+            }
+
+            // Listener untuk tombol Server HLS
+            if (hlsServerControls) {
+                hlsServerControls.addEventListener('click', (e) => {
+                    const button = e.target.closest('button');
+                    if (!button) return;
+
+                    loadHlsStream(button.dataset.src);
+                    
+                    // Update 'active' state
+                    hlsServerControls.querySelectorAll('.server-btn').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                });
+            }
+
+            // Listener untuk tombol Server iframe
+            if (iframeServerControls) {
+                iframeServerControls.addEventListener('click', (e) => {
+                    const button = e.target.closest('button');
+                    if (!button) return;
+
+                    loadIframeStream(button.dataset.src);
+                    
+                    // Update 'active' state
+                    iframeServerControls.querySelectorAll('.server-btn').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                });
+            }
+
+
+            // --- LOGIKA INISIALISASI ---
+
+            if (hlsStreams.length > 0) {
+                // Prioritaskan HLS jika tersedia
+                // Tandai tombol player HLS sebagai aktif
+                playerTypeControls?.querySelector('[data-player-type="hls"]').classList.add('active');
+                // Klik tombol server HLS pertama secara otomatis
+                hlsServerControls.querySelector('.server-btn').click();
+            } 
+            else if (iframeStreams.length > 0) {
+                // Jika hanya iframe yang tersedia
+                switchPlayerView('iframe');
+                // Tandai tombol player iframe sebagai aktif
+                playerTypeControls?.querySelector('[data-player-type="iframe"]').classList.add('active');
+                 // Klik tombol server iframe pertama secara otomatis
+                iframeServerControls.querySelector('.server-btn').click();
             }
         });
     </script>

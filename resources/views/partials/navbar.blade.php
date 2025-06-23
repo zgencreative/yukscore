@@ -4,7 +4,7 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasLeft" aria-controls="offcanvasLeft">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <a class="navbar-brand" href="/">
+        <a class="navbar-brand" href="https://yuksports.com">
             <img src="{{ $logo ?? '/img/default_logo.png' }}" alt="Logo" />
         </a>
         <button class="btn search-icon" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
@@ -13,7 +13,7 @@
         <div class="offcanvas offcanvas-start bg-dark" tabindex="-1" id="offcanvasLeft" aria-labelledby="offcanvasLeftLabel" style="width: 225px">
             <div class="offcanvas-body">
                 <div class="d-flex justify-content-between">
-                    <a class="navbar-brand" href="/">
+                    <a class="navbar-brand" href="https://yuksports.com">
                         <img src="{{ $logo ?? '/img/default_logo.png' }}" alt="Logo" />
                     </a>
                     <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -38,7 +38,7 @@
 
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">
+                        <a class="nav-link" href="https://score.yuksports.com">
                             <i class="fas fa-futbol"></i>
                             <span class="d-lg-inline"> Scores </span>
                         </a>
@@ -86,7 +86,7 @@
 {{-- Navigasi untuk Layar Besar (Desktop) --}}
 <nav class="navbar navbar-expand-lg navbar-dark" id="nav-large">
     <div class="container">
-        <a class="navbar-brand" href="/">
+        <a class="navbar-brand" href="https://yuksports.com">
             <img src="{{ $logo ?? '/img/default_logo.png' }}" alt="Logo" />
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,7 +95,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="/">
+                    <a class="nav-link" href="https://score.yuksports.com">
                         <i class="fas fa-futbol"></i> Scores
                     </a>
                 </li>
