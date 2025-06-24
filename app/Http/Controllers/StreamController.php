@@ -33,23 +33,25 @@ class StreamController extends Controller
             // Gunakan Laravel Collection untuk mencari data dengan mudah dan efisien
             $event = collect($scheduleData)->firstWhere('id_match', $matchId);
 
-            // --- PERUBAHAN LOGIKA ---
-            // Abort jika event tidak ditemukan, ATAU jika kedua jenis stream (hls DAN iframe) kosong.
-            if (!$event || (empty($event['hls_streams']) && empty($event['iframe_streams']))) {
+            // --- PERUBAHAN LOGIKA PENGECEKAN ---
+            // Abort jika event tidak ditemukan, ATAU jika SEMUA jenis stream kosong.
+            if (!$event || (empty($event['hls_streams']) && empty($event['iframe_streams']) && empty($event['dash_streams']))) {
                 abort(404, 'Stream untuk pertandingan ini tidak ditemukan atau tidak tersedia.');
             }
 
             // --- PERUBAHAN PENGAMBILAN DATA ---
-            // Ambil array hls_streams dan iframe_streams. Gunakan '?? []' sebagai fallback jika key tidak ada.
+            // Ambil semua jenis stream. Gunakan '?? []' sebagai fallback jika key tidak ada.
             $hlsStreams = $event['hls_streams'] ?? [];
-            $iframeStreams = $event['iframe_streams'] ?? []; // Tambahkan ini
-            $matchName = $event['match_name'];
+            $iframeStreams = $event['iframe_streams'] ?? [];
+            $dashStreams = $event['dash_streams'] ?? []; // Tambahkan ini
+            $matchName = $event['match_name'] ?? 'Detail Pertandingan';
             
             // --- PERUBAHAN DATA YANG DIKIRIM KE VIEW ---
             // Kirim semua data yang relevan ke view
             return view('stream', [
                 'hlsStreams' => $hlsStreams,
-                'iframeStreams' => $iframeStreams, // Tambahkan ini
+                'iframeStreams' => $iframeStreams,
+                'dashStreams' => $dashStreams, // Tambahkan ini
                 'matchName' => $matchName,
                 'proxyBaseUrl' => $proxyBaseUrl
             ]);
