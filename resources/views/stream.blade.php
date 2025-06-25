@@ -226,7 +226,9 @@
             // --- FUNGSI-FUNGSI UTAMA ---
             function loadHlsStream(url) {
                 if (!hlsPlayer) return;
-                const proxiedUrl = `${proxyBaseUrl}/hls?url=${encodeURIComponent(url)}`;
+                const proxiedUrl = url.includes('su.carryflix.workers.dev')
+                ? `${proxyBaseUrl}/hls?url=${encodeURIComponent(url)}`
+                : url;
                 console.log("Memuat HLS Stream:", proxiedUrl);
                 hlsPlayer.src({ src: proxiedUrl, type: 'application/x-mpegURL' });
             }
