@@ -245,22 +245,50 @@
             }
 
             function switchPlayerView(playerType) {
-                const elements = [hlsPlayerElement, dashPlayerElement, iframePlayerElement];
-                const controls = [hlsServerControls, dashServerControls, iframeServerControls];
+                const playerMap = {
+                    hls: {
+                        player: hlsPlayerElement,
+                        controls: hlsServerControls
+                    },
+                    dash: {
+                        player: dashPlayerElement,
+                        controls: dashServerControls
+                    },
+                    iframe: {
+                        player: iframePlayerElement,
+                        controls: iframeServerControls
+                    }
+                };
 
-                // Sembunyikan semua terlebih dahulu
-                elements.forEach(el => el.classList.add('hidden'));
-                controls.forEach(ctrl => ctrl?.classList.add('hidden')); // `?.` untuk safety
+                // Non-aktifkan dan sembunyikan SEMUA player terlebih dahulu
+                Object.keys(playerMap).forEach(type => {
+                    const elements = playerMap[type];
 
-                if (playerType === 'hls') {
-                    hlsPlayerElement.classList.remove('hidden');
-                    hlsServerControls?.classList.remove('hidden');
-                } else if (playerType === 'dash') {
-                    dashPlayerElement.classList.remove('hidden');
-                    dashServerControls?.classList.remove('hidden');
-                } else if (playerType === 'iframe') {
-                    iframePlayerElement.classList.remove('hidden');
-                    iframeServerControls?.classList.remove('hidden');
+                    // Sembunyikan elemen visualnya
+                    elements.player?.classList.add('hidden');
+                    elements.controls?.classList.add('hidden');
+
+                    // Lakukan pembersihan (cleanup) sesuai tipe player
+                    if (type === 'hls' && hlsPlayer) {
+                        hlsPlayer.pause();
+                        // --- INI PERBAIKANNYA ---
+                        // Memberitahu Video.js untuk membersihkan tampilan error.
+                        hlsPlayer.error(null); 
+                    }
+                    if (type === 'dash' && dashPlayerInstance && dashPlayerInstance.getMediaElement()) {
+                        dashPlayerInstance.getMediaElement().pause();
+                    }
+                    if (type === 'iframe') {
+                        iframePlayerElement.src = 'about:blank';
+                    }
+                });
+
+
+                // Tampilkan HANYA elemen yang dipilih berdasarkan playerType
+                const selectedPlayer = playerMap[playerType];
+                if (selectedPlayer) {
+                    selectedPlayer.player?.classList.remove('hidden');
+                    selectedPlayer.controls?.classList.remove('hidden');
                 }
             }
 
