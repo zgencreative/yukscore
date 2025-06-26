@@ -167,8 +167,11 @@ class ApiController extends Controller
         $scheduleData = [];
 
         if (!$date) {
-            $date = now()->format('Ymd');
+            // Membuat instance waktu saat ini dengan timezone Asia/Jakarta (WIB / GMT+7)
+            // dan langsung memformatnya.
+            $date = now('Asia/Jakarta')->format('Ymd');
             
+            // dd($date); // Ini akan menampilkan tanggal yang benar sesuai WIB
         }
 
         // URL API yang akan di-request
