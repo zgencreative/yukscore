@@ -20,6 +20,8 @@ Route::get('/team/{idTeam}', [DetailTeamController::class, 'show'])->name('team.
 
 Route::get('/stream/{matchId}', [StreamController::class, 'playById'])->name('stream.play');
 
+Route::get('/proxy/streams', [App\Http\Controllers\StreamController::class, 'proxyStreamManifest']);
+
 //BACKEND API
 
 Route::prefix('api')->group(function () {
