@@ -33,25 +33,24 @@ class StreamController extends Controller
             // Gunakan Laravel Collection untuk mencari data dengan mudah dan efisien
             $event = collect($scheduleData)->firstWhere('id_match', $matchId);
 
-            // --- PERUBAHAN LOGIKA PENGECEKAN ---
             // Abort jika event tidak ditemukan, ATAU jika SEMUA jenis stream kosong.
-            if (!$event || (empty($event['hls_streams']) && empty($event['iframe_streams']) && empty($event['dash_streams']))) {
+            if (!$event || (empty($event['hls_streams']) && empty($event['iframe_streams']) && empty($event['dash_streams']) && empty($event['tv_links']))) {
                 abort(404, 'Stream untuk pertandingan ini tidak ditemukan atau tidak tersedia.');
             }
 
-            // --- PERUBAHAN PENGAMBILAN DATA ---
             // Ambil semua jenis stream. Gunakan '?? []' sebagai fallback jika key tidak ada.
             $hlsStreams = $event['hls_streams'] ?? [];
             $iframeStreams = $event['iframe_streams'] ?? [];
-            $dashStreams = $event['dash_streams'] ?? []; // Tambahkan ini
+            $dashStreams = $event['dash_streams'] ?? [];
+            $tvLinks = $event['tv_links'] ?? [];
             $matchName = $event['match_name'] ?? 'Detail Pertandingan';
             
-            // --- PERUBAHAN DATA YANG DIKIRIM KE VIEW ---
             // Kirim semua data yang relevan ke view
             return view('stream', [
                 'hlsStreams' => $hlsStreams,
                 'iframeStreams' => $iframeStreams,
-                'dashStreams' => $dashStreams, // Tambahkan ini
+                'dashStreams' => $dashStreams,
+                'tv_links' => $tvLinks,
                 'matchName' => $matchName,
                 'proxyBaseUrl' => $proxyBaseUrl
             ]);
@@ -59,6 +58,32 @@ class StreamController extends Controller
         } catch (\Exception $e) {
             Log::error("Error di StreamController: " . $e->getMessage());
             abort(500, 'Terjadi kesalahan pada server.');
+        }
+    }
+
+    /**
+     * <<< PERUBAHAN BARU: Fungsi Proxy untuk mengatasi CORS
+     * Fungsi ini akan mengambil data dari URL eksternal dan mengembalikannya sebagai JSON.
+     */
+    public function proxyStreamManifest()
+    {
+        $manifestUrl = 'https://carryflix.com/streams.json';
+
+        try {
+            $response = Http::timeout(10)->get($manifestUrl);
+
+            if ($response->successful()) {
+                // Kembalikan konten JSON langsung dengan header yang benar
+                return response($response->body())
+                      ->header('Content-Type', 'application/json');
+            }
+
+            // Jika gagal, kembalikan response error
+            return response()->json(['error' => 'Gagal mengambil manifest stream dari sumber.'], $response->status());
+
+        } catch (\Exception $e) {
+            Log::error("Error di proxyStreamManifest: " . $e->getMessage());
+            return response()->json(['error' => 'Kesalahan server saat mem-proxy request.'], 500);
         }
     }
 }
