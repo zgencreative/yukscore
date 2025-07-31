@@ -250,10 +250,16 @@ class ApiController extends Controller
             $scheduleLookup = [];
             if (!empty($scheduleData) && is_array($scheduleData)) {
                 foreach ($scheduleData as $scheduleEvent) {
-                    // Pastikan key 'id_match' ada
-                    if (isset($scheduleEvent['id_match'])) {
-                        // Key: ID Pertandingan, Value: Array berisi link HLS
-                        $scheduleLookup[$scheduleEvent['id_match']] = $scheduleEvent['hls_streams'];
+                    // Pastikan key 'id_match' ada dan tidak kosong
+                    if (!empty($scheduleEvent['id_match'])) {
+                        // Key: ID Pertandingan
+                        // Value: Array yang hanya berisi semua jenis stream
+                        $scheduleLookup[$scheduleEvent['id_match']] = [
+                            'hls_streams'    => $scheduleEvent['hls_streams'] ?? [],
+                            'dash_streams'   => $scheduleEvent['dash_streams'] ?? [],
+                            'iframe_streams' => $scheduleEvent['iframe_streams'] ?? [],
+                            'tv_links'       => $scheduleEvent['tv_links'] ?? []
+                        ];
                     }
                 }
             }
