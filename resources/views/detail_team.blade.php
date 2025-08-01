@@ -66,27 +66,27 @@
           const links = [
             {
               id: "matches-link",
-              endpoint: (id) => `/api/football/detailTeam/${id}/`,
+              endpoint: (id) => `/api/football/detailTeam/${id}`,
             },
             {
               id: "table-link",
-              endpoint: (id) => `/api/football/detailTeam/table/${id}/`,
+              endpoint: (id) => `/api/football/detailTeam/table/${id}`,
             },
             {
               id: "squad-link",
-              endpoint: (id) => `/api/football/detailTeam/squad/${id}/`,
+              endpoint: (id) => `/api/football/detailTeam/squad/${id}`,
             },
             {
               id: "player-link",
-              endpoint: (id) => `/api/football/detailTeam/playerstat/${id}/`,
+              endpoint: (id) => `/api/football/detailTeam/playerstat/${id}`,
             },
             {
               id: "team-link",
-              endpoint: (id) => `/api/football/detailTeam/stat/${id}/`,
+              endpoint: (id) => `/api/football/detailTeam/stat/${id}`,
             },
             {
               id: "team-news",
-              endpoint: (id) => `/api/football/detailTeam/news/${id}/`,
+              endpoint: (id) => `/api/football/detailTeam/news/${id}`,
             }
 
           ];
@@ -213,7 +213,7 @@
                 e.preventDefault();  // Mencegah link untuk navigasi
 
                 // Lakukan request ke URL yang sesuai (misalnya URL menggunakan event.Snm atau ID)
-                const url = `/api/football/detailTeam/stat/${idTeam}/${event.Sid}/`;  // Contoh URL
+                const url = `/api/football/detailTeam/stat/${idTeam}/${event.Sid}`;  // Contoh URL
                 fetch(url)
                   .then(response => response.json())
                   .then(data => {
@@ -374,7 +374,7 @@
                 e.preventDefault();  // Mencegah link untuk navigasi
 
                 // Lakukan request ke URL yang sesuai (misalnya URL menggunakan event.Snm atau ID)
-                const url = `/api/football/detailTeam/playerstat/${idTeam}/${event.Sid}/`;  // Contoh URL
+                const url = `/api/football/detailTeam/playerstat/${idTeam}/${event.Sid}`;  // Contoh URL
                 fetch(url)
                   .then(response => response.json())
                   .then(data => {
