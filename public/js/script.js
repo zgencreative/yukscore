@@ -598,7 +598,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                         const idMatch =
                                             div.getAttribute("data-match");
                                         // URL tujuan untuk request
-                                        const url = "/api/sendVote/"; // Ganti dengan URL yang sesuai
+                                        const url = "/api/sendVote"; // Ganti dengan URL yang sesuai
                                         // Mengirimkan permintaan menggunakan fetch
                                         fetch(url, {
                                             method: "POST",
@@ -1785,7 +1785,7 @@ async function reloadInitialView() {
             };
         };
         // Melakukan permintaan ke API untuk data awal
-        const response = await fetch("/api/search/", {
+        const response = await fetch("/api/search", {
             method: "GET", // Atur metode (GET/POST, dsb.)
             headers: {
                 "Content-Type": "application/json", // Tipe konten permintaan
@@ -1927,7 +1927,7 @@ async function reloadInitialView() {
 // Fungsi performSearch
 const performSearch = async (query) => {
     try {
-        const response = await fetch(`/api/search/${query}/`);
+        const response = await fetch(`/api/search/${query}`);
         const data = await response.json();
 
         const regionList = document.getElementById("region");
@@ -2028,7 +2028,7 @@ const createCompetitionItem = (competition) => {
 async function detailCountry(country, title) {
     try {
         // Melakukan permintaan ke API
-        const response = await fetch(`/api/football/detailCountry/${country}/`);
+        const response = await fetch(`/api/football/detailCountry/${country}`);
         const data = await response.json();
 
         const leftBar = document.getElementById("leftSide");
@@ -2132,8 +2132,8 @@ function slideLeft() {
 
 async function fetchSortedData(dateParam = null) {
     const uri = dateParam
-        ? `/api/sorted-data/${dateParam}/` // Jika ada dateParam, tambahkan ke URL
-        : "/api/sorted-data/"; // Jika tidak ada, panggil tanpa parameter
+        ? `/api/sorted-data/${dateParam}` // Jika ada dateParam, tambahkan ke URL
+        : "/api/sorted-data"; // Jika tidak ada, panggil tanpa parameter
 
     const scrollableContainers = document.getElementsByClassName(
         "scrollable-container"
