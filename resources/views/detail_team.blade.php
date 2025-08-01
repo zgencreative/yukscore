@@ -203,7 +203,7 @@
           const currentPath = window.location.pathname; // Contoh: "/match/1251295"
           const segments = currentPath.split("/"); // ["", "match", "1251295"]
           const idTable = `${segments[2]}.${segments[3]}`;
-          const idTeam = segments[segments.length - 2]; // Ambil elemen terakhir sebagai ID ("1251295")
+          const idTeam = segments[segments.length - 1]; // Ambil elemen terakhir sebagai ID ("1251295")
 
           // Menambahkan setiap event ke dropdown
           events.forEach(event => {
