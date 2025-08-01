@@ -44,24 +44,24 @@ document.addEventListener("DOMContentLoaded", function () {
             const links = [
                 {
                     id: "stats-link",
-                    endpoint: (id) => `/api/football/detailMatch/stat/${id}/`,
+                    endpoint: (id) => `/api/football/detailMatch/stat/${id}`,
                 },
                 {
                     id: "lineups-link",
-                    endpoint: (id) => `/api/football/detailMatch/lineup/${id}/`,
+                    endpoint: (id) => `/api/football/detailMatch/lineup/${id}`,
                 },
                 {
                     id: "table-link",
                     endpoint: (id) =>
-                        `/api/football/detailMatch/table/${idTable}/`,
+                        `/api/football/detailMatch/table/${idTable}`,
                 },
                 {
                     id: "news-link",
-                    endpoint: (id) => `/api/football/detailMatch/news/${id}/`,
+                    endpoint: (id) => `/api/football/detailMatch/news/${id}`,
                 },
                 {
                     id: "info-link",
-                    endpoint: (id) => `/api/football/detailMatch/info/${id}/`,
+                    endpoint: (id) => `/api/football/detailMatch/info/${id}`,
                 },
             ];
 
