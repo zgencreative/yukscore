@@ -1089,14 +1089,28 @@ public function getPlayerStat($teamId, $eventId = null)
 
     // Step 2: Proses daftar kompetisi (Events)
     foreach ($teamData['Stages'] ?? [] as $stage) {
-        $datas['Events'][] = [
-            'Sid' => $stage['Sid'] ?? '',
-            'Snm' => $stage['Snm'] ?? '',
-            'Cnm' => $stage['Cnm'] ?? '',
-            'CompN' => $stage['CompN'] ?? '',
-            'CompST' => $stage['CompST'] ?? '',
-            'badgeUrl' => $stage['badgeUrl'] ?? ''
-        ];
+        // Flag untuk menandai jika ada match 'FT'
+        $hasFinishedMatch = false;
+
+        // Loop di dalam semua event pada stage ini untuk memeriksa status 'Eps'
+        foreach ($stage['Events'] ?? [] as $event) {
+            if (isset($event['Eps']) && $event['Eps'] == 'FT') {
+                $hasFinishedMatch = true;
+                break; // Keluar dari loop event karena sudah cukup menemukan satu
+            }
+        }
+
+        // Hanya tambahkan data stage jika ditemukan match dengan status 'FT'
+        if ($hasFinishedMatch) {
+            $datas['Events'][] = [
+                'Sid' => $stage['Sid'] ?? '',
+                'Snm' => $stage['Snm'] ?? '',
+                'Cnm' => $stage['Cnm'] ?? '',
+                'CompN' => $stage['CompN'] ?? '',
+                'CompST' => $stage['CompST'] ?? '',
+                'badgeUrl' => $stage['badgeUrl'] ?? ''
+            ];
+        }
     }
 
     // Step 3: Tentukan event ID (kalau tidak disediakan, ambil dari event pertama)
@@ -1226,14 +1240,28 @@ public function getTeamStat($teamId, $eventId = null)
     ];
 
     foreach ($res['Stages'] ?? [] as $stage) {
-        $datas['Events'][] = [
-            'Sid' => $stage['Sid'] ?? '',
-            'Snm' => $stage['Snm'] ?? '',
-            'Cnm' => $stage['Cnm'] ?? '',
-            'CompN' => $stage['CompN'] ?? '',
-            'CompST' => $stage['CompST'] ?? '',
-            'badgeUrl' => $stage['badgeUrl'] ?? ''
-        ];
+        // Gunakan flag untuk menandai jika ada pertandingan yang sudah 'FT'
+        $hasFinishedMatch = false;
+
+        // Periksa setiap event di dalam stage ini
+        foreach ($stage['Events'] ?? [] as $event) {
+            if (isset($event['Eps']) && $event['Eps'] == 'FT') {
+                $hasFinishedMatch = true;
+                break; // Hentikan pencarian jika sudah ditemukan satu
+            }
+        }
+
+        // Hanya proses dan tambahkan stage ini jika flag bernilai true
+        if ($hasFinishedMatch) {
+            $datas['Events'][] = [
+                'Sid' => $stage['Sid'] ?? '',
+                'Snm' => $stage['Snm'] ?? '',
+                'Cnm' => $stage['Cnm'] ?? '',
+                'CompN' => $stage['CompN'] ?? '',
+                'CompST' => $stage['CompST'] ?? '',
+                'badgeUrl' => $stage['badgeUrl'] ?? ''
+            ];
+        }
     }
 
     // Tentukan eventId
