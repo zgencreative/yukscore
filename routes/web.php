@@ -11,7 +11,9 @@ use App\Http\Controllers\StreamController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MobileStreamController;
 
-Route::get('/', [HomeController::class, 'index'])->name('index');;
+Route::get('/', [HomeController::class, 'index'])->name('index');
+
+Route::post('/chat/{matchId}', [ChatController::class, 'sendMessage'])->name('chat.send');
 
 Route::get('/match/{country}/{comp}/{idMatch}', [DetailMatchController::class, 'show']);
 

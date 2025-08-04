@@ -13,8 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         //
-        $middleware->validateCsrfTokens(except:['/login','/register']);
+        $middleware->validateCsrfTokens(except:['/login','/register', ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->withBroadcasting(__DIR__.'/../routes/channels.php')
+    ->create();

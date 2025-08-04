@@ -172,5 +172,4 @@
 <script>
   var currentPage = "{{ $page_name }}";
 </script>
-<script src="{{asset("js/script.js")}}"></script>
 @endsection
