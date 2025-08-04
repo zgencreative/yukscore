@@ -1,0 +1,27 @@
+{
+  "public/css/style.css": {
+    "file": "assets/style-DOjp-YhM.css",
+    "src": "public/css/style.css",
+    "isEntry": true
+  },
+  "public/img/Rectangle_4539.png": {
+    "file": "assets/Rectangle_4539-CWRKhI2L.png",
+    "src": "public/img/Rectangle_4539.png"
+  },
+  "public/img/match_header.png": {
+    "file": "assets/match_header-M1PPkNj3.png",
+    "src": "public/img/match_header.png"
+  },
+  "public/js/script.js": {
+    "file": "assets/script-pVnT4tAV.js",
+    "name": "script",
+    "src": "public/js/script.js",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-Daa28qAZ.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}
