@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // --- FUNGSI-FUNGSI UTAMA ---
     function loadHlsStream(url) {
         if (!hlsPlayer) return;
-        const proxiedUrl = url.includes("su.carryflix.workers.dev")
+        const proxiedUrl = url.includes("carryflix.workers.dev")
             ? `${proxyBaseUrl}/hls?url=${encodeURIComponent(url)}`
             : url;
         hlsPlayer.src({ src: proxiedUrl, type: "application/x-mpegURL" });
