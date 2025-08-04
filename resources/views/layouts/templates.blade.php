@@ -28,7 +28,7 @@
     
     @yield('extra_head')
 </head>
-<body>
+<body data-is-logged-in="{{ auth()->check() ? 'true' : 'false' }}">
     <form method="POST" action="{{ route('logout') }}" class="d-none" id="global-logout-form">
         @csrf
     </form>

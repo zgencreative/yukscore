@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", async function () {
     // --- Konfigurasi Awal ---
+    let hlsPlayer, dashPlayerInstance;
     const streamDataElement = document.getElementById("stream-data");
 
     const hlsStreams = JSON.parse(streamDataElement.dataset.hlsStreams);
@@ -19,6 +20,93 @@ document.addEventListener("DOMContentLoaded", async function () {
         "iframe-server-controls"
     );
     const dashServerControls = document.getElementById("dash-server-controls");
+
+    function setupLoginModalTimer() {
+        // 1. Cek status login dari body tag
+        const isLoggedIn = document.body.dataset.isLoggedIn === "true";
+        console.log(sessionStorage.getItem("loginModalShown"));
+
+        // 2. Jika pengguna adalah 'guest' DAN modal belum pernah ditampilkan di sesi ini
+        if (!isLoggedIn) {
+            const totalDuration = 30000; // Total durasi 30 detik
+
+            // 3. Cek apakah waktu mulai sudah tersimpan di sessionStorage
+            let countdownStartTime =
+                sessionStorage.getItem("countdownStartTime");
+
+            if (!countdownStartTime) {
+                // Jika belum ada, ini adalah kunjungan pertama. Catat waktu sekarang.
+                countdownStartTime = Date.now();
+                sessionStorage.setItem(
+                    "countdownStartTime",
+                    countdownStartTime
+                );
+                console.log("Timer dimulai untuk pertama kali.");
+            }
+
+            // 4. Hitung waktu yang sudah berlalu
+            const elapsedTime = Date.now() - parseInt(countdownStartTime, 10);
+
+            // 5. Hitung sisa waktu
+            const timeRemaining = totalDuration - elapsedTime;
+
+            console.log(
+                `Waktu tersisa untuk modal: ${Math.round(
+                    timeRemaining / 1000
+                )} detik.`
+            );
+
+            // 6. Jalankan aksi jika waktunya sudah habis atau kurang dari 0
+            if (timeRemaining <= 0) {
+                // Jika waktu sudah habis (misalnya pengguna refresh setelah 30 detik)
+                triggerModalActions();
+            } else {
+                // Jika masih ada sisa waktu, jalankan setTimeout dengan sisa waktu tersebut
+                setTimeout(triggerModalActions, timeRemaining);
+            }
+        }
+    }
+
+    // Pisahkan aksi ke dalam fungsi sendiri agar tidak duplikat kode
+    function triggerModalActions() {
+        console.log("Waktu habis. Menampilkan modal login.");
+
+        // Pause player yang sedang aktif
+        if (typeof hlsPlayer !== "undefined" && hlsPlayer.hasStarted()) {
+            hlsPlayer.pause();
+        }
+        if (
+            typeof dashPlayerInstance !== "undefined" &&
+            dashPlayerInstance.getMediaElement() &&
+            !dashPlayerInstance.getMediaElement().paused
+        ) {
+            dashPlayerInstance.getMediaElement().pause();
+        }
+        if (
+            iframePlayerElement &&
+            !iframePlayerElement.classList.contains("hidden")
+        ) {
+            // Mengosongkan src akan menghentikan video di dalam iframe
+            iframePlayerElement.src = "about:blank";
+        }
+
+        const allPlayerControls =
+            document.getElementsByClassName("controls-group");
+
+        // Loop melalui setiap elemen dan tambahkan class 'controls-disabled'
+        for (const controlGroup of allPlayerControls) {
+            controlGroup.classList.add("controls-disabled");
+        }
+
+        // Panggil fungsi showModal() Anda
+        showModal();
+
+        // Set flag di sessionStorage agar modal tidak muncul lagi
+        sessionStorage.setItem("loginModalShown", "true");
+    }
+
+    // Jangan lupa panggil fungsi utamanya
+    setupLoginModalTimer();
 
     // --- Fungsi Fetch Data ---
     async function fetchStreamManifest() {
@@ -56,7 +144,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         return;
     }
 
-    let hlsPlayer, dashPlayerInstance;
     if (hlsStreams.length > 0) {
         hlsPlayer = videojs(hlsPlayerElement, {
             autoplay: true,

@@ -138,6 +138,10 @@
             background-color: #1e40af; border-color: #2563eb; box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
         }
         .hidden { display: none !important; }
+        .controls-disabled {
+            opacity: 0.5;
+            pointer-events: none; /* Ini akan menonaktifkan semua klik mouse */
+        }
     </style>
 @endsection
 
