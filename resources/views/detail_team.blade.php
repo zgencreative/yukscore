@@ -965,5 +965,4 @@
           return "Just now";
       }
 </script>
-<script src="{{ asset('js/script.js') }}"></script>
 @endsection

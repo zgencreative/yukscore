@@ -47,6 +47,7 @@ class StreamController extends Controller
             
             // Kirim semua data yang relevan ke view
             return view('stream', [
+                'matchId' => $matchId,
                 'hlsStreams' => $hlsStreams,
                 'iframeStreams' => $iframeStreams,
                 'dashStreams' => $dashStreams,
