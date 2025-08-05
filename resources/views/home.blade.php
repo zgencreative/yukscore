@@ -5,6 +5,48 @@
   rel="stylesheet"
   href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
 />
+<style>
+    .match-card-alt {
+        display: flex; /* Mengatur layout menjadi horizontal */
+        background-color: #1e293b; /* Warna latar gelap sesuai tema Anda */
+        border-radius: 8px;
+        margin-bottom: 15px;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        overflow: hidden; /* Penting untuk rounded corner di bagian ikon */
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .match-card-alt:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .match-card-alt .match-card-content {
+        padding: 15px;
+        flex-grow: 1; /* Konten mengambil sisa ruang */
+    }
+    .match-card-alt .match-name {
+        color: #e2e8f0;
+        font-size: 1rem;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+    .match-card-alt .countdown {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    .match-card-alt .match-card-icon {
+        flex-shrink: 0; /* Mencegah area ikon mengecil */
+        width: 60px;
+        background-color: #2563eb; /* Warna biru untuk area ikon */
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+</style>
 @endsection
 
 @section('content')
@@ -85,7 +127,41 @@
 
     <!-- Sidebar Kanan -->
     <div class="col-md-3" id="right-content">
-      <!-- Optional sidebar kanan -->
+        <h4>Segera Hadir</h4>
+        
+        <div class="match-card-list">
+            @forelse ($upcomingMatches as $match)
+                @if (!empty($match['id_match']))
+                    <a href="{{ route('stream.play', ['matchId' => $match['id_match']]) }}" class="match-card-alt">
+                        {{-- Area Konten Teks di Kiri --}}
+                        <div class="match-card-content">
+                            <span class="match-name">{{ Str::limit($match['match_name'], 30) }}</span>
+                            <span class="countdown" data-starttime="{{ $match['start_time'] }}">
+                                Memuat...
+                            </span>
+                        </div>
+                        {{-- Area Ikon Berwarna di Kanan --}}
+                        <div class="match-card-icon">
+                            <i class="fas fa-play"></i> {{-- Contoh ikon Font Awesome --}}
+                        </div>
+                    </a>
+                @else
+                    <div class="match-card-alt" style="opacity: 0.6; cursor: not-allowed;">
+                        <div class="match-card-content">
+                            <span class="match-name">{{ Str::limit($match['match_name'], 30) }}</span>
+                            <span class="countdown" data-starttime="{{ $match['start_time'] }}">
+                                Link belum ada
+                            </span>
+                        </div>
+                        <div class="match-card-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                @endif
+            @empty
+                <p class="text-muted">Tidak ada pertandingan yang akan datang.</p>
+            @endforelse
+        </div>
     </div>
   </div>
 </div>
@@ -94,6 +170,54 @@
 @section('extra_js')
 <script>
   var currentPage = "{{ $page_name ?? 'home' }}";
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Ambil semua elemen countdown
+    const countdownElements = document.querySelectorAll('.countdown');
+
+    // Fungsi untuk mem-parsing format YYYYMMDDHHMMSS
+    function parseCustomDateTime(dateTimeString) {
+        const year = parseInt(dateTimeString.substring(0, 4), 10);
+        const month = parseInt(dateTimeString.substring(4, 6), 10) - 1; // Bulan di JS dimulai dari 0
+        const day = parseInt(dateTimeString.substring(6, 8), 10);
+        const hour = parseInt(dateTimeString.substring(8, 10), 10);
+        const minute = parseInt(dateTimeString.substring(10, 12), 10);
+        const second = parseInt(dateTimeString.substring(12, 14), 10);
+        return new Date(year, month, day, hour, minute, second);
+    }
+
+    // 2. Jalankan interval yang akan update setiap detik
+    setInterval(() => {
+        const now = new Date().getTime();
+
+        countdownElements.forEach(el => {
+            const startTimeString = el.dataset.starttime;
+            const startTime = parseCustomDateTime(startTimeString).getTime();
+            const distance = startTime - now;
+
+            if (distance < 0) {
+                el.innerHTML = "SEDANG BERLANGSUNG";
+                return; // Lanjut ke elemen berikutnya
+            }
+
+            // 3. Kalkulasi sisa waktu
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // 4. Format dan tampilkan hasilnya
+            let result = '';
+            if (days > 0) result += days + "h ";
+            if (hours > 0 || days > 0) result += hours + "j ";
+            result += minutes + "m " + seconds + "d";
+            
+            el.innerHTML = result;
+        });
+    }, 1000);
+});
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

@@ -78,12 +78,7 @@
                     text: result.message || "Selamat datang kembali!",
                     icon: "success"
                 }).then(() => {
-                    closeModal(); // Pastikan closeModal() terdefinisi
-                    if (result.redirect_url) {
-                        window.location.href = result.redirect_url;
-                    } else {
-                        window.location.reload(); // Fallback jika tidak ada redirect_url
-                    }
+                    window.location.reload(); // Fallback jika tidak ada redirect_url
                 });
             } else {
                 // Ini terjadi jika server mengembalikan { success: false } dengan status 200 OK

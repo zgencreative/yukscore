@@ -53,18 +53,29 @@
                 </ul>
 
                 {{-- Jika #NavSm hanya untuk mobile, bagian ini mungkin tidak diperlukan di sini atau kelasnya perlu disesuaikan --}}
-                <div class="d-none d-lg-flex align-items-center mt-auto"> {{-- Penyesuaian: d-none dan mt-auto agar di bawah jika ini adalah sidebar menu --}}
+                <div class="d-none d-lg-flex align-items-center mt-auto">
+
+                    {{-- Opsi Bahasa --}}
                     <span class="text-light me-3">ENG</span>
+
+                    {{-- Tampilan untuk pengguna yang sudah login --}}
                     @auth
-                        <a href="/profile" class="btn btn-sm btn-signin">Profile</a>
-                        <a href="{{ route('logout') }}" class="btn btn-sm btn-signup"
-                           onclick="event.preventDefault(); document.getElementById('global-logout-form').submit();">
-                           Logout
+                        <a href="/profile" class="btn btn-sm btn-signin me-2">Profile</a>
+                        
+                        <a href="{{ route('logout') }}"
+                        class="btn btn-sm btn-signup"
+                        onclick="event.preventDefault(); document.getElementById('global-logout-form').submit();">
+                            Logout
                         </a>
-                        {{-- FORM LOGOUT INDIVIDUAL DIHAPUS DARI SINI --}}
-                    @else
-                        <button class="btn btn-sm btn-signin me-2" onclick="showModal()">Sign In</button>
                     @endauth
+
+                    {{-- Tampilan untuk pengunjung (guest) --}}
+                    @guest
+                        <button class="btn btn-sm btn-signin" onclick="showModal()">
+                            Sign In
+                        </button>
+                    @endguest
+
                 </div>
             </div>
         </div>
@@ -106,22 +117,29 @@
                 </li>
                 {{-- Tambahkan item menu lain jika ada --}}
             </ul>
-            <div class="d-flex align-items-center">
-                {{-- Jika Anda ingin tombol search di sini juga untuk desktop --}}
-                {{-- <button class="btn search-icon me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
-                    <img src="{{ asset('img/search.png') }}" alt="Search" />
-                </button> --}}
+            <div class="d-none d-lg-flex align-items-center mt-auto">
+
+                {{-- Opsi Bahasa --}}
                 <span class="text-light me-3">ENG</span>
+
+                {{-- Tampilan untuk pengguna yang sudah login --}}
                 @auth
-                    <a href="/profile" class="btn btn-sm btn-signin">Profile</a>
-                    <a href="{{ route('logout') }}" class="btn btn-sm btn-signup"
-                       onclick="event.preventDefault(); document.getElementById('global-logout-form').submit();">
-                       Logout
+                    <a href="/profile" class="btn btn-sm btn-signin me-2">Profile</a>
+                    
+                    <a href="{{ route('logout') }}"
+                    class="btn btn-sm btn-signup"
+                    onclick="event.preventDefault(); document.getElementById('global-logout-form').submit();">
+                        Logout
                     </a>
-                    {{-- FORM LOGOUT INDIVIDUAL DIHAPUS DARI SINI --}}
-                @else
-                    <button class="btn btn-sm btn-signin me-2" onclick="showModal()">Sign In</button>
                 @endauth
+
+                {{-- Tampilan untuk pengunjung (guest) --}}
+                @guest
+                    <button class="btn btn-sm btn-signin" onclick="showModal()">
+                        Sign In
+                    </button>
+                @endguest
+
             </div>
         </div>
     </div>
