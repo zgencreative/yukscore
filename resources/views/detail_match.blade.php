@@ -59,7 +59,7 @@
         <!-- Menu Section -->
         <div class="menu-bar">
           <div class="menu-items">
-            @if (!in_array($data['data']['Status_Match'], ['FT', 'NS']))
+            @if ($has_live)
                 <p class="menu-link" id="live-link" onclick="window.location.href='/stream/{{ $data['data']['IDMatch'] }}'" style="cursor: pointer;">LIVE</p>
             @endif
             <p class="menu-link" id="info-link">INFO</p>

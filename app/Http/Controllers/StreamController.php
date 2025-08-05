@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\ChatMessage;
+use Illuminate\Support\Facades\Auth; 
 
 class StreamController extends Controller
 {
@@ -44,16 +46,26 @@ class StreamController extends Controller
             $dashStreams = $event['dash_streams'] ?? [];
             $tvLinks = $event['tv_links'] ?? [];
             $matchName = $event['match_name'] ?? 'Detail Pertandingan';
+
+            $chatMessages = ChatMessage::where('match_id', $matchId)
+                            ->latest()
+                            ->take(50)
+                            ->get()
+                            ->reverse()
+                            ->values() // <-- Tambahkan ini untuk mereset key
+                            ->all(); 
             
             // Kirim semua data yang relevan ke view
             return view('stream', [
                 'matchId' => $matchId,
+                'chatMessages' => $chatMessages,
                 'hlsStreams' => $hlsStreams,
                 'iframeStreams' => $iframeStreams,
                 'dashStreams' => $dashStreams,
                 'tv_links' => $tvLinks,
                 'matchName' => $matchName,
-                'proxyBaseUrl' => $proxyBaseUrl
+                'proxyBaseUrl' => $proxyBaseUrl,
+                'user' => Auth::user()
             ]);
 
         } catch (\Exception $e) {

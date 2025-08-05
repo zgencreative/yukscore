@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if (currentPage === "match") {
             // Ambil path dari URL
             const currentPath = window.location.pathname; // Contoh: "/match/1251295"
-            console.log(currentPath);
             const segments = currentPath.split("/"); // ["", "match", "1251295"]
             const idTable = `${segments[2]}.${segments[3]}`;
             const id = segments[segments.length - 1]; // Ambil elemen terakhir sebagai ID ("1251295")
@@ -2658,18 +2657,10 @@ function displayCategory(type, category, index, urlComp) {
                         </div>
                     </div>
                     <div class="button-primary">
-                        ${
-                            data.has_live_url
-                                ? // Jika true, panggil goToLive dengan 'data.IDMatch'
-                                  `<b href="#" onclick="goToLive(event, '${data.IDMatch}')" class="button blinking-live">
-                                LIVE NOW!!
-                            </b>`
-                                : // Jika false, tampilkan waktu
-                                  `<b class="button">
-                                <img alt="" src="/img/calendar_card.png"> 
-                                ${formatTimestamp(data.time_start)}
-                            </b>`
-                        }
+                        <b class="button">
+                            <img alt="" src="/img/calendar_card.png"> 
+                            ${formatTimestamp(data.time_start)}
+                        </b>
                     </div>
                 </div>
             `;
@@ -2880,17 +2871,4 @@ function timeAgo(dateString) {
         }
     }
     return "Just now";
-}
-
-function goToLive(event, matchId) {
-    event.stopPropagation();
-    event.preventDefault();
-
-    if (!matchId) {
-        console.error("ID Pertandingan tidak tersedia.");
-        return;
-    }
-
-    // Arahkan browser ke halaman stream dengan ID pertandingan
-    window.location.href = `/stream/${matchId}`;
 }

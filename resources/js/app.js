@@ -14,6 +14,10 @@ const chatAppElement = document.getElementById("chat-app");
 if (chatAppElement) {
     const props = {
         matchId: chatAppElement.dataset.matchId,
+        initialMessages: JSON.parse(
+            chatAppElement.dataset.initialMessages || "[]"
+        ),
+        user: JSON.parse(chatAppElement.dataset.user || "null"),
     };
     createApp(ChatComponent, props).mount(chatAppElement);
 }

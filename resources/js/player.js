@@ -24,7 +24,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     function setupLoginModalTimer() {
         // 1. Cek status login dari body tag
         const isLoggedIn = document.body.dataset.isLoggedIn === "true";
-        console.log(sessionStorage.getItem("loginModalShown"));
 
         // 2. Jika pengguna adalah 'guest' DAN modal belum pernah ditampilkan di sesi ini
         if (!isLoggedIn) {
@@ -41,7 +40,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                     "countdownStartTime",
                     countdownStartTime
                 );
-                console.log("Timer dimulai untuk pertama kali.");
             }
 
             // 4. Hitung waktu yang sudah berlalu
@@ -49,12 +47,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             // 5. Hitung sisa waktu
             const timeRemaining = totalDuration - elapsedTime;
-
-            console.log(
-                `Waktu tersisa untuk modal: ${Math.round(
-                    timeRemaining / 1000
-                )} detik.`
-            );
 
             // 6. Jalankan aksi jika waktunya sudah habis atau kurang dari 0
             if (timeRemaining <= 0) {
@@ -69,8 +61,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Pisahkan aksi ke dalam fungsi sendiri agar tidak duplikat kode
     function triggerModalActions() {
-        console.log("Waktu habis. Menampilkan modal login.");
-
         // Pause player yang sedang aktif
         if (typeof hlsPlayer !== "undefined" && hlsPlayer.hasStarted()) {
             hlsPlayer.pause();
@@ -119,7 +109,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             data.forEach((item) => {
                 streamManifestMap[item.id] = item;
             });
-            console.log("Manifest stream berhasil dimuat via proxy.");
         } catch (error) {
             console.error("Gagal memuat manifest stream:", error);
             document.querySelectorAll("[data-tvlink-id]").forEach((btn) => {
@@ -162,7 +151,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // --- FUNGSI-FUNGSI UTAMA ---
     function loadHlsStream(url) {
-        console.log(url);
         if (!hlsPlayer) return;
         const proxiedUrl = url.includes("carryflix.workers.dev")
             ? `${proxyBaseUrl}/hls?url=${encodeURIComponent(url)}`
@@ -173,24 +161,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     function loadDashStream(url, drmData = null) {
         if (!dashPlayerInstance) return;
 
-        console.log("Memuat DASH Stream:", url);
         let drmConfiguration = {}; // Default: tanpa DRM
 
         if (drmData) {
             if (drmData.widevine) {
-                console.log("Mengonfigurasi DRM Widevine");
                 drmConfiguration = {
                     servers: { "com.widevine.alpha": drmData.widevine },
                 };
             } else if (drmData.clearkeys || drmData.clearkey) {
-                console.log("Mengonfigurasi DRM ClearKey");
                 drmConfiguration = {
                     clearKeys: drmData.clearkeys || drmData.clearkey,
                 };
             }
         }
 
-        console.log("Konfigurasi Shaka Player:", { drm: drmConfiguration });
         dashPlayerInstance.configure({ drm: drmConfiguration });
         dashPlayerInstance
             .load(url)

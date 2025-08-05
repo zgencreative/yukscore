@@ -221,7 +221,11 @@
         </div>
 
         {{-- KOLOM KANAN: LIVE CHAT --}}
-        <div class="chat-column" id="chat-app" data-match-id="{{ $matchId }}">
+        <div class="chat-column" id="chat-app"
+            data-match-id="{{ $matchId }}"
+            data-initial-messages='@json($chatMessages)'
+            data-user='@json($user)'
+        >
         </div>
 
     </div>
