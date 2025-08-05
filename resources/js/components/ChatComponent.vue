@@ -26,14 +26,15 @@ import axios from "axios";
 
 // 1. Menerima 'matchId' sebagai properti dari elemen HTML
 const props = defineProps({
-    matchId: {
-        type: String, // Tipe data adalah String
-        required: true, // Properti ini wajib ada
-    },
+    matchId: { type: String, required: true },
+    initialMessages: { type: Array, default: () => [] },
+    user: { type: Object, default: null }, // <-- Terima prop user (bisa null)
 });
 
 // 2. State management menggunakan ref
-const messages = ref([]);
+const messages = ref(
+    Array.isArray(props.initialMessages) ? [...props.initialMessages] : []
+);
 const newMessage = ref("");
 const senderName = ref("");
 const messagesContainer = ref(null); // Untuk referensi ke elemen DOM
@@ -52,6 +53,7 @@ const scrollToBottom = () => {
 
 // Fungsi untuk mendapatkan atau membuat nama Guest acak
 const getOrSetGuestName = () => {
+    // Fungsi ini sekarang hanya untuk GUEST
     let name = localStorage.getItem("guest_name");
     if (!name) {
         name = "Guest" + Math.floor(Math.random() * 9000 + 1000);
@@ -62,44 +64,70 @@ const getOrSetGuestName = () => {
 
 // Fungsi untuk mengirim pesan
 const sendMessage = async () => {
-    // Jangan kirim jika pesan kosong
     if (newMessage.value.trim() === "" || !senderName.value) return;
 
-    const messageData = {
+    // --- PERUBAHAN DIMULAI DI SINI ---
+
+    // 1. Tentukan nama yang benar untuk ditampilkan di UI secara langsung
+    const optimisticName = props.user ? props.user.name : senderName.value;
+
+    // 2. Buat objek pesan untuk ditampilkan di UI (Optimistic Update)
+    // Gunakan optimisticName yang baru saja kita tentukan
+    const optimisticMessage = {
+        id: Date.now(), // ID sementara untuk rendering
+        sender_name: optimisticName,
+        message: newMessage.value,
+    };
+    messages.value.push(optimisticMessage);
+    scrollToBottom();
+
+    // 3. Buat data yang akan dikirim ke backend
+    // Backend tetap akan memvalidasi dan menggunakan nama dari sesi login
+    const dataToSend = {
         sender_name: senderName.value,
         message: newMessage.value,
     };
 
-    // Optimistic Update: Langsung tampilkan pesan di UI pengirim untuk UX yang lebih baik
-    messages.value.push(messageData);
-    scrollToBottom();
+    // Kosongkan input setelah data disiapkan
+    newMessage.value = "";
 
     try {
-        // Kirim data ke backend menggunakan URL dinamis sesuai matchId
-        await axios.post(`/chat/${props.matchId}`, messageData);
+        // Kirim data ke backend
+        await axios.post(`/chat/${props.matchId}`, dataToSend);
     } catch (error) {
         console.error("Gagal mengirim pesan:", error);
-        // Opsional: Tambahkan logika jika pesan gagal terkirim, misal mengubah warna pesan
-    } finally {
-        // Kosongkan input setelah pesan dikirim
-        newMessage.value = "";
+        // Opsional: Hapus pesan dari UI jika pengiriman gagal
+        // messages.value.pop();
     }
+
+    // --- AKHIR PERUBAHAN ---
 };
 
 // --- LIFECYCLE HOOK ---
 
 // Kode yang akan dijalankan saat komponen pertama kali dirender
 onMounted(() => {
-    getOrSetGuestName();
+    // Tentukan nama pengirim berdasarkan status login
+    if (props.user) {
+        // Jika user login, gunakan namanya
+        senderName.value = props.user.name;
+    } else {
+        // Jika guest, jalankan logika nama acak
+        getOrSetGuestName();
+    }
 
-    // Dengarkan channel yang dinamis sesuai dengan matchId yang diterima
+    // Dengarkan channel broadcast
     window.Echo.channel(`stream-chat.${props.matchId}`).listen(
         ".new-message",
         (e) => {
-            // Tambahkan pesan baru yang diterima dari broadcast ke dalam array
-            messages.value.push(e.message);
-            scrollToBottom();
+            // Cek agar pesan dari diri sendiri tidak duplikat (opsional tapi bagus)
+            if (e.message.sender_name !== senderName.value) {
+                messages.value.push(e.message);
+                scrollToBottom();
+            }
         }
     );
+
+    scrollToBottom();
 });
 </script>

@@ -9,19 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
+    public function up(): void {
         Schema::create('chat_messages', function (Blueprint $table) {
             $table->id();
+            $table->string('match_id')->index(); // Tambahkan index untuk pencarian cepat
+            $table->string('sender_name');
+            $table->text('message');
             $table->timestamps();
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
+    public function down(): void {
         Schema::dropIfExists('chat_messages');
     }
 };

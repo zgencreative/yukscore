@@ -14,13 +14,13 @@ export default defineConfig({
         }),
         vue(),
     ],
-    // server: {
-    //     host: "0.0.0.0",
-    //     hmr: {
-    //         host: "192.168.56.1",
-    //     },
-    //     cors: {
-    //         origin: "*",
-    //     },
-    // },
+    server: {
+        host: "0.0.0.0",
+        hmr: {
+            host: "192.168.18.5",
+        },
+        cors: {
+            origin: "*",
+        },
+    },
 });
