@@ -135,8 +135,12 @@
 
                 {{-- Tampilan untuk pengunjung (guest) --}}
                 @guest
-                    <button class="btn btn-sm btn-signin" onclick="showModal()">
+                    <button class="btn btn-sm btn-signin me-2" onclick="showModal()">
                         Sign In
+                    </button>
+
+                    <button class="btn btn-sm btn-signup" onclick="showSignupRedirectAlert()">
+                        Sign Up
                     </button>
                 @endguest
 

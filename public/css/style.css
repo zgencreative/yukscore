@@ -820,6 +820,11 @@ table tbody td {
     background-color: var(--Foundation-Primary-primary-600, #ec5200);
 }
 
+.button-group {
+    display: flex;
+    gap: 10px; /* Atur jarak antar tombol di sini, misal 10px */
+}
+
 .result-button-matchesDetailTeam:hover {
     background-color: var(--Foundation-Primary-primary-600, #b4b4b4);
 }
