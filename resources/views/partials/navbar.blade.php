@@ -22,17 +22,25 @@
                 <div class="d-lg-none">
                     <div class="d-flex flex-row gap-2 my-3">
                         @auth
-                            <a href="/profile" class="btn btn-sm btn-signin">Profile</a>
-                            <a href="{{ route('logout') }}" class="btn btn-sm btn-signup"
-                               onclick="event.preventDefault(); document.getElementById('global-logout-form').submit();">
-                               Logout
+                            <a href="/profile" class="btn btn-sm btn-signin me-2">Profile</a>
+                            
+                            <a href="{{ route('logout') }}"
+                            class="btn btn-sm btn-signup"
+                            onclick="event.preventDefault(); document.getElementById('global-logout-form').submit();">
+                                Logout
                             </a>
-                            {{-- FORM LOGOUT INDIVIDUAL DIHAPUS DARI SINI --}}
-                        @else
-                            <button class="btn btn-sm btn-signin" data-bs-toggle="modal" data-bs-target="#loginModal" style="width: 91px">
+                        @endauth
+
+                        {{-- Tampilan untuk pengunjung (guest) --}}
+                        @guest
+                            <button class="btn btn-sm btn-signin me-2" onclick="showModal()">
                                 Sign In
                             </button>
-                        @endauth
+
+                            <button class="btn btn-sm btn-signup" onclick="showSignupRedirectAlert()">
+                                Sign Up
+                            </button>
+                        @endguest
                     </div>
                 </div>
 
@@ -71,8 +79,12 @@
 
                     {{-- Tampilan untuk pengunjung (guest) --}}
                     @guest
-                        <button class="btn btn-sm btn-signin" onclick="showModal()">
+                        <button class="btn btn-sm btn-signin me-2" onclick="showModal()">
                             Sign In
+                        </button>
+
+                        <button class="btn btn-sm btn-signup" onclick="showSignupRedirectAlert()">
+                            Sign Up
                         </button>
                     @endguest
 
