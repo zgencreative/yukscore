@@ -126,7 +126,7 @@
     </div>
 
     <!-- Sidebar Kanan -->
-    <div class="col-md-3" id="right-content">
+    <div class="col-md-3 text-light" id="right-content">
         <h4>Segera Hadir</h4>
         
         <div class="match-card-list">
@@ -159,7 +159,7 @@
                     </div>
                 @endif
             @empty
-                <p class="text-muted">Tidak ada pertandingan yang akan datang.</p>
+                <p class="text-light">Tidak ada pertandingan yang akan datang.</p>
             @endforelse
         </div>
     </div>
@@ -170,54 +170,6 @@
 @section('extra_js')
 <script>
   var currentPage = "{{ $page_name ?? 'home' }}";
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Ambil semua elemen countdown
-    const countdownElements = document.querySelectorAll('.countdown');
-
-    // Fungsi untuk mem-parsing format YYYYMMDDHHMMSS
-    function parseCustomDateTime(dateTimeString) {
-        const year = parseInt(dateTimeString.substring(0, 4), 10);
-        const month = parseInt(dateTimeString.substring(4, 6), 10) - 1; // Bulan di JS dimulai dari 0
-        const day = parseInt(dateTimeString.substring(6, 8), 10);
-        const hour = parseInt(dateTimeString.substring(8, 10), 10);
-        const minute = parseInt(dateTimeString.substring(10, 12), 10);
-        const second = parseInt(dateTimeString.substring(12, 14), 10);
-        return new Date(year, month, day, hour, minute, second);
-    }
-
-    // 2. Jalankan interval yang akan update setiap detik
-    setInterval(() => {
-        const now = new Date().getTime();
-
-        countdownElements.forEach(el => {
-            const startTimeString = el.dataset.starttime;
-            const startTime = parseCustomDateTime(startTimeString).getTime();
-            const distance = startTime - now;
-
-            if (distance < 0) {
-                el.innerHTML = "SEDANG BERLANGSUNG";
-                return; // Lanjut ke elemen berikutnya
-            }
-
-            // 3. Kalkulasi sisa waktu
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            // 4. Format dan tampilkan hasilnya
-            let result = '';
-            if (days > 0) result += days + "h ";
-            if (hours > 0 || days > 0) result += hours + "j ";
-            result += minutes + "m " + seconds + "d";
-            
-            el.innerHTML = result;
-        });
-    }, 1000);
-});
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
