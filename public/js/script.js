@@ -7,6 +7,53 @@ document.addEventListener("DOMContentLoaded", function () {
         if (currentPage === "home") {
             generateCalendar();
             fetchSortedData();
+            const countdownElements = document.querySelectorAll(".countdown");
+
+            // Fungsi untuk mem-parsing format YYYYMMDDHHMMSS
+            function parseCustomDateTime(dateTimeString) {
+                const year = parseInt(dateTimeString.substring(0, 4), 10);
+                const month = parseInt(dateTimeString.substring(4, 6), 10) - 1; // Bulan di JS dimulai dari 0
+                const day = parseInt(dateTimeString.substring(6, 8), 10);
+                const hour = parseInt(dateTimeString.substring(8, 10), 10);
+                const minute = parseInt(dateTimeString.substring(10, 12), 10);
+                const second = parseInt(dateTimeString.substring(12, 14), 10);
+                return new Date(year, month, day, hour, minute, second);
+            }
+
+            // 2. Jalankan interval yang akan update setiap detik
+            setInterval(() => {
+                const now = new Date().getTime();
+
+                countdownElements.forEach((el) => {
+                    const startTimeString = el.dataset.starttime;
+                    const startTime =
+                        parseCustomDateTime(startTimeString).getTime();
+                    const distance = startTime - now;
+
+                    if (distance < 0) {
+                        el.innerHTML = "SEDANG BERLANGSUNG";
+                        return; // Lanjut ke elemen berikutnya
+                    }
+
+                    // 3. Kalkulasi sisa waktu
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor(
+                        (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+                    );
+                    const minutes = Math.floor(
+                        (distance % (1000 * 60 * 60)) / (1000 * 60)
+                    );
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    // 4. Format dan tampilkan hasilnya
+                    let result = "";
+                    if (days > 0) result += days + "h ";
+                    if (hours > 0 || days > 0) result += hours + "j ";
+                    result += minutes + "m " + seconds + "d";
+
+                    el.innerHTML = result;
+                });
+            }, 1000);
         } else if (currentPage === "match") {
             // Ambil path dari URL
             const currentPath = window.location.pathname; // Contoh: "/match/1251295"
@@ -1177,6 +1224,9 @@ function matches(data, tipe, urlComp) {
     // Kemudian, tambahkan kelas "active" pada elemen yang dipilih
     links_id.classList.add("active");
 
+    const buttonContainer = document.createElement("div");
+    buttonContainer.classList.add("button-group"); // Class untuk styling
+
     const button1 = document.createElement("button");
     button1.classList.add("button-matchesDetailTeam");
     button1.textContent = "FIXTURES";
@@ -1190,15 +1240,17 @@ function matches(data, tipe, urlComp) {
         button1.classList.add("active");
         button2.classList.remove("active");
     }
-    container.appendChild(button1);
+    buttonContainer.appendChild(button1);
     button1.addEventListener("click", () => {
         matches(data, "FIXTURES", urlComp); // Calls the 'tables' function with the LeagueTable data
     });
 
-    container.appendChild(button2);
+    buttonContainer.appendChild(button2);
     button2.addEventListener("click", () => {
         matches(data, "RESULTS", urlComp); // Calls the 'tables' function with the LeagueTable data
     });
+
+    container.appendChild(buttonContainer);
 
     // Main2 Section
     const main2Section = document.createElement("div");
@@ -1923,6 +1975,8 @@ async function reloadInitialView() {
     }
 }
 
+window.reloadInitialView = reloadInitialView;
+
 // Fungsi performSearch
 const performSearch = async (query) => {
     try {
@@ -2085,6 +2139,8 @@ async function detailCountry(country, title) {
         console.error("Error fetching country details:", error);
     }
 }
+
+window.detailCountry = detailCountry;
 
 const calendarBtn = document.getElementById("kt_datepicker_1");
 
@@ -2872,3 +2928,23 @@ function timeAgo(dateString) {
     }
     return "Just now";
 }
+
+function showSignupRedirectAlert() {
+    Swal.fire({
+        title: "Informasi Pendaftaran",
+        text: "Silahkan Daftar Melalui Yuksports. Anda akan diarahkan dalam 5 detik.",
+        icon: "info",
+        timer: 5000, // Waktu dalam milidetik (5000ms = 5 detik)
+        timerProgressBar: true, // Menampilkan bar timer
+        allowOutsideClick: false, // Mencegah pengguna menutup alert
+        didOpen: () => {
+            Swal.showLoading(); // Menampilkan ikon loading
+        },
+        willClose: () => {
+            // Ganti dengan URL pendaftaran Yuksports yang sebenarnya
+            window.location.href = "https://yuksports.com/";
+        },
+    });
+}
+
+window.showSignupRedirectAlert = showSignupRedirectAlert;
