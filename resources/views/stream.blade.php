@@ -238,4 +238,25 @@
     {{-- Library Player --}}
     <script src="https://vjs.zencdn.net/8.11.8/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.7.13/dist/shaka-player.compiled.js"></script>
+    <script>
+        function showSignupRedirectAlert() {
+            Swal.fire({
+                title: "Informasi Pendaftaran",
+                text: "Silahkan Daftar Melalui Yuksports. Anda akan diarahkan dalam 5 detik.",
+                icon: "info",
+                timer: 5000, // Waktu dalam milidetik (5000ms = 5 detik)
+                timerProgressBar: true, // Menampilkan bar timer
+                allowOutsideClick: false, // Mencegah pengguna menutup alert
+                didOpen: () => {
+                    Swal.showLoading(); // Menampilkan ikon loading
+                },
+                willClose: () => {
+                    // Ganti dengan URL pendaftaran Yuksports yang sebenarnya
+                    window.location.href = "https://yuksports.com/";
+                },
+            });
+        }
+
+        window.showSignupRedirectAlert = showSignupRedirectAlert;
+    </script>
 @endsection
