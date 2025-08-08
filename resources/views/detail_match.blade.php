@@ -20,7 +20,7 @@
         @php
           $teks1 = '';
           $teks2 = '';
-          if (!empty($data['data']['Score1'])) {
+          if (isset($data['data']['Score1']) && $data['data']['Score1'] !== '') {
               $teks1 = $data['data']['time_start'];
               $teks2 = $data['data']['Score1'] . ' - ' . $data['data']['Score2'];
           } else {
