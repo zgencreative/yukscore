@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     // Jangan lupa panggil fungsi utamanya
-    setupLoginModalTimer();
+    // setupLoginModalTimer();
 
     // --- Fungsi Fetch Data ---
     async function fetchStreamManifest() {
