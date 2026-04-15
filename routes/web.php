@@ -31,9 +31,10 @@ Route::get('/mobile-stream', [MobileStreamController::class, 'showIframe']);
 
 Route::prefix('api')->group(function () {
     Route::get('/football/detailCountry/{country}', [ApiController::class, 'detailCountry']);
+    Route::post('/football/favorite', [ApiController::class, 'getMatchFavorite']);
     Route::get('/football/{date}', [ApiController::class, 'footballByDate']);
     Route::get('/sorted-data/{date?}', [ApiController::class, 'sortedData']);
-    Route::get('/search/{keyword?}', [ApiController::class, 'search']);
+    Route::get('/search/{keyword?}/{type?}', [ApiController::class, 'search']);
 
     Route::prefix('football/detailMatch')->group(function () {
         Route::get('/{idMatch}', [ApiController::class, 'getDetailMatch']);

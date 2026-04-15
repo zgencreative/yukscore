@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\File;
 use DateTimeZone;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Http\JsonResponse;
 
 class ApiController extends Controller
 {
@@ -252,96 +254,216 @@ class ApiController extends Controller
         return response()->json($sorted_data);
     }
 
-    public function search($keyword = null)
+    public function search($keyword = null, $type = "Football"): JsonResponse
     {
         $img_badge = 'https://static.lsmedia1.com/competition/high/';
         $img_team = 'https://lsm-static-prod.lsmedia1.com/medium/';
         $default_team_img = asset('img/default_team.png');
         $default_badge_img = asset('img/friendlist.jpg');
 
-        $response_data = [
-            'code' => 200,
-            'message' => 'success',
-            'data' => []
-        ];
+        $kw = trim((string) $keyword);
+        $kwNormalized = mb_strtolower(preg_replace('/\s+/', ' ', $kw));
+        $kwKey = $kwNormalized !== '' ? sha1($kwNormalized) : 'default';
+
+        $freshKey = "search:fresh:{$kwKey}";
+        $staleKey = "search:stale:{$kwKey}";
+        $lockKey  = "search:lock:{$kwKey}";
+
+        $freshTtl = $kwNormalized !== '' ? now()->addSeconds(120) : now()->addMinutes(5);
+        $staleTtl = $kwNormalized !== '' ? now()->addMinutes(30)  : now()->addHours(2);
+
+        $fresh = Cache::get($freshKey);
+        if (is_array($fresh) && isset($fresh['code'])) {
+            return response()->json($fresh, 200);
+        }
+
+        $lock = Cache::lock($lockKey, 15);
 
         try {
-            $url = $keyword
-                ? "https://prod-cdn-search-api.lsmedia1.com/api/v2/search/soccer?query={$keyword}&limit=10&locale=ID&teams=true&stages=true&categories=true&countryCode=ID"
-                : "https://prod-cdn-search-api.lsmedia1.com/api/v2/search/soccer?locale=ID&limit=5&teams=true&stages=true&categories=true&countryCode=ID";
+            if ($lock->get()) {
+                $fresh = Cache::get($freshKey);
+                if (is_array($fresh) && isset($fresh['code'])) {
+                    return response()->json($fresh, 200);
+                }
 
-            $res = Http::get($url)->json();
+                $url = $kwNormalized !== ''
+                    ? "https://prod-cdn-search-api.lsmedia1.com/api/v2/search/soccer?query=" . urlencode($kwNormalized) . "&limit=10&locale=ID&teams=true&stages=true&categories=true&countryCode=ID"
+                    : "https://prod-cdn-search-api.lsmedia1.com/api/v2/search/soccer?locale=ID&limit=20&teams=true&stages=true&categories=true&countryCode=ID";
 
-            $data = [
-                'teams' => [],
-                'stages' => [],
-                'players' => [],
-                'categories' => [],
-            ];
+                $urlTeam = "https://prod-cdn-search-api.livescore.com/api/v2/search/soccer/team?query=" . urlencode($kwNormalized) . "&countryCode=ID&limit=20&locale=ID";
+                $urlComp = "https://prod-cdn-search-api.livescore.com/api/v2/search/soccer/stage?query=" . urlencode($kwNormalized) . "&countryCode=ID&limit=20&locale=ID";
+                $urlPlayer = "https://prod-cdn-search-api.livescore.com/api/v2/search/soccer/player?query=" . urlencode($kwNormalized) . "&countryCode=ID&limit=20&locale=ID";
+                $urlCategory = "https://prod-cdn-search-api.livescore.com/api/v2/search/soccer/category?query=" . urlencode($kwNormalized) . "&countryCode=ID&limit=20&locale=ID";
 
-            // Teams
-            foreach ($res['Teams'] ?? [] as $team) {
-                $data['teams'][] = [
-                    'IDTeam'  => $team['ID'] ?? '',
-                    'NMTeam'  => $team['Nm'] ?? '',
-                    'IMGTeam' => isset($team['Img']) ? $img_team . $team['Img'] : $default_team_img,
-                    'CoNm'    => $team['CoNm'] ?? '',
-                    'CoId'    => $team['CoId'] ?? '',
-                    'Abr'     => $team['Abr'] ?? '',
+                $response = Http::connectTimeout(5)
+                    ->timeout(20)
+                    ->retry(2, 500, fn($e) => $e instanceof ConnectionException)
+                    ->acceptJson()
+                    ->get($url);
+
+                $responseTeam = Http::connectTimeout(5)
+                    ->timeout(20)
+                    ->retry(2, 500, fn($e) => $e instanceof ConnectionException)
+                    ->acceptJson()
+                    ->get($urlTeam);
+
+                $responseComp = Http::connectTimeout(5)
+                    ->timeout(20)
+                    ->retry(2, 500, fn($e) => $e instanceof ConnectionException)
+                    ->acceptJson()
+                    ->get($urlComp);
+
+                $responsePlayer = Http::connectTimeout(5)
+                    ->timeout(20)
+                    ->retry(2, 500, fn($e) => $e instanceof ConnectionException)
+                    ->acceptJson()
+                    ->get($urlPlayer);
+
+                $responseCategory = Http::connectTimeout(5)
+                    ->timeout(20)
+                    ->retry(2, 500, fn($e) => $e instanceof ConnectionException)
+                    ->acceptJson()
+                    ->get($urlCategory);
+
+                if (!$response->successful()) {
+                    // upstream error -> fallback stale
+                    $stale = Cache::get($staleKey);
+                    if (is_array($stale) && isset($stale['code'])) {
+                        return response()->json($stale, 200);
+                    }
+
+                    return response()->json([
+                        'code' => 502,
+                        'message' => 'Failed to fetch data from upstream (search)',
+                        'data' => []
+                    ], 502);
+                }
+
+                $res = $response->json();
+
+                $data = [
+                    'teams' => [],
+                    'stages' => [],
+                    'players' => [],
+                    'categories' => [],
                 ];
+
+                // Teams
+                foreach ($responseTeam->json()["Teams"] ?? $res['Teams'] ?? [] as $team) {
+                    $data['teams'][] = [
+                        'IDTeam'  => $team['ID'] ?? '',
+                        'NMTeam'  => $team['Nm'] ?? '',
+                        'IMGTeam' => !empty($team['Img']) ? $img_team . $team['Img'] : $default_team_img,
+                        'CoNm'    => $team['CoNm'] ?? '',
+                        'CoId'    => $team['CoId'] ?? '',
+                        'Abr'     => $team['Abr'] ?? '',
+                        'type'    => $type,
+                    ];
+                }
+
+                // Stages
+                foreach ($responseComp->json()["Stages"] ?? $res['Stages'] ?? [] as $stage) {
+                    $badge_url = str_contains($stage['Cnm'] ?? '', 'Friendlies')
+                        ? $default_badge_img
+                        : (
+                            !empty($stage['badgeUrl'])
+                                ? $img_badge . $stage['badgeUrl']
+                                : "https://static.lsmedia1.com/i2/fh/" . ($stage['Ccd'] ?? '') . ".jpg"
+                        );
+
+                    $data['stages'][] = [
+                        'Sid'      => $stage['Sid'] ?? '',
+                        'Snm'      => $stage['Sds'] ?? $stage['Snm'] ?? '',
+                        'Scd'      => $stage['Scd'] ?? '',
+                        'Cnm'      => $stage['Cnm'] ?? '',
+                        'badgeUrl' => $badge_url,
+                        'urlComp'  => ($stage['Ccd'] ?? '') . '.' . ($stage['Scd'] ?? ''),
+                        'CompId'   => $stage['CompId'] ?? '',
+                        'CompN'    => $stage['CompN'] ?? '',
+                        'CompST'   => $stage['CompST'] ?? '',
+                        'type'    => $type,
+                    ];
+                }
+
+                // Categories
+                foreach ($responseCategory->json()["Categories"] ?? $res['Categories'] ?? [] as $category) {
+                    $badge_url = str_contains($category['Cnm'] ?? '', 'Friendlies')
+                        ? $default_badge_img
+                        : (
+                            !empty($category['badgeUrl'])
+                                ? $img_badge . $category['badgeUrl']
+                                : "https://static.lsmedia1.com/i2/fh/" . ($category['Ccd'] ?? '') . ".jpg"
+                        );
+
+                    $data['categories'][] = [
+                        'Cid'      => $category['Cid'] ?? '',
+                        'Cnm'      => $category['Cnm'] ?? '',
+                        'badgeUrl' => $badge_url,
+                        'Ccd'      => $category['Ccd'] ?? '',
+                        'CompId'   => $category['CompId'] ?? '',
+                        'type'    => $type,
+                    ];
+                }
+
+                // Players
+                foreach ($responsePlayer->json()["Players"] ?? $res['Players'] ?? [] as $player) {
+                    $data['players'][] = [
+                        'id'=> $player['ID'] ?? "",
+                        'name' => $player['Pnm'] ?? "",
+                        'slug'=> $player['Pnt'] ?? "",
+                        'imageTeam'=> !empty($player['Img']) ? $img_team . $player['Img'] : $default_team_img,
+                        'avatar' => $player['ImageUrl'] ?? "",
+                        'teamId'=> $player['Pid'] ?? "",
+                        'teamName'=> $player['Tnm'] ?? "",
+                        'type'    => $type,
+                    ];
+                }
+
+                $response_data = [
+                    'code' => 200,
+                    'message' => 'success',
+                    'data' => $data
+                ];
+
+                // Simpan fresh+stale
+                Cache::put($freshKey, $response_data, $freshTtl);
+                Cache::put($staleKey, $response_data, $staleTtl);
+
+                return response()->json($response_data, 200);
             }
 
-            // Stages
-            foreach ($res['Stages'] ?? [] as $stage) {
-                $badge_url = str_contains($stage['Cnm'] ?? '', 'Friendlies')
-                    ? $default_badge_img
-                    : (
-                        !empty($stage['badgeUrl'])
-                            ? $img_badge . $stage['badgeUrl']
-                            : "https://static.lsmedia1.com/i2/fh/" . ($stage['Ccd'] ?? '') . ".jpg"
-                    );
-
-                $data['stages'][] = [
-                    'Sid'      => $stage['Sid'] ?? '',
-                    'Snm'      => $stage['Sds'] ?? $stage['Snm'] ?? '',
-                    'Scd'      => $stage['Scd'] ?? '',
-                    'Cnm'      => $stage['Cnm'] ?? '',
-                    'badgeUrl' => $badge_url,
-                    'urlComp'  => ($stage['Ccd'] ?? '') . '.' . ($stage['Scd'] ?? ''),
-                    'CompId'   => $stage['CompId'] ?? '',
-                    'CompN'    => $stage['CompN'] ?? '',
-                    'CompST'   => $stage['CompST'] ?? '',
-                ];
+            // Kalau refresh sedang berlangsung, pakai stale
+            $stale = Cache::get($staleKey);
+            if (is_array($stale) && isset($stale['code'])) {
+                return response()->json($stale, 200);
             }
 
-            // Categories
-            foreach ($res['Categories'] ?? [] as $category) {
-                $badge_url = str_contains($category['Cnm'] ?? '', 'Friendlies')
-                    ? $default_badge_img
-                    : (
-                        !empty($category['badgeUrl'])
-                            ? $img_badge . $category['badgeUrl']
-                            : "https://static.lsmedia1.com/i2/fh/" . ($category['Ccd'] ?? '') . ".jpg"
-                    );
+            // last fallback kosong
+            return response()->json([
+                'code' => 200,
+                'message' => 'success (empty cache fallback)',
+                'data' => [
+                    'teams' => [],
+                    'stages' => [],
+                    'players' => [],
+                    'categories' => [],
+                ]
+            ], 200);
 
-                $data['categories'][] = [
-                    'Cid'      => $category['Cid'] ?? '',
-                    'Cnm'      => $category['Cnm'] ?? '',
-                    'badgeUrl' => $badge_url,
-                    'Ccd'      => $category['Ccd'] ?? '',
-                    'CompId'   => $category['CompId'] ?? '',
-                ];
+        } catch (\Throwable $e) {
+            // fallback stale saat error internal/timeout
+            $stale = Cache::get($staleKey);
+            if (is_array($stale) && isset($stale['code'])) {
+                return response()->json($stale, 200);
             }
 
-            $response_data['data'] = $data;
-            return response()->json($response_data);
-
-        } catch (\Exception $e) {
             return response()->json([
                 'code' => 500,
                 'message' => 'Failed to fetch data: ' . $e->getMessage(),
                 'data' => []
             ], 500);
+        } finally {
+            optional($lock)->release();
         }
     }
 
@@ -1422,6 +1544,137 @@ public function getDetailMatchInfo($id)
         ], 500);
     }
 }
+
+public function getMatchFavorite(Request $request){
+    try {
+        $teams = $request->team;
+        $type = $request->type ?? "fixtures";
+        $allEvent = [];
+        $img_badge     = 'https://static.lsmedia1.com/competition/high/';
+        $img_team      = 'https://lsm-static-prod.lsmedia1.com/medium/';
+        $default_img   = url('img/default_team.png');
+        $default_badge = url('img/friendlist.jpg');
+
+        foreach ($teams as $club) {
+            $slug = Str::slug($club['NMTeam']);
+            $id = $club["IDTeam"];
+
+            $url = "https://www.livescore.com/_next/data/3E4-wCB_yzP84ycgV4U_F/en/football/team/{$slug}/{$id}/{$type}.json";
+            $response = Http::get($url);
+            $res = $response->json();
+            $groups = $res['pageProps']['initialData']['eventsByMatchType'];
+
+            foreach ($groups as $group) {
+                foreach ($group['Events'] ?? [] as $event) {
+                    $badge_url = (str_contains($group['Snm'] ?? '', 'Friendlies'))
+                        ? $default_badge
+                        : (
+                            !empty($group['badgeUrl'])
+                                ? $img_badge . $group['badgeUrl']
+                                : "https://static.lsmedia1.com/i2/fh/" . ($group['Ccd'] ?? '') . ".jpg"
+                        );
+
+                    $team1_img = $event['T1'][0]['Img'] ?? null;
+                    $team2_img = $event['T2'][0]['Img'] ?? null;
+
+                    $dataevent = [
+                            'IDMatch'      => $event['Eid'] ?? null,
+                            'Team1'        => [
+                                'NMTeam'  => $event['T1'][0]['Nm'] ?? '',
+                                'IDTeam'  => $event['T1'][0]['ID'] ?? '',
+                                'IMGTeam' => $team1_img ? $img_team . $team1_img : $default_img,
+                            ],
+                            'Team2'        => [
+                                'NMTeam'  => $event['T2'][0]['Nm'] ?? '',
+                                'IDTeam'  => $event['T2'][0]['ID'] ?? '',
+                                'IMGTeam' => $team2_img ? $img_team . $team2_img : $default_img,
+                            ],
+                            'Status_Match' => $event['Eps'] ?? '',
+                            'time_start'   => $event['Esd'] ?? '',
+                        ];
+
+                        if (!in_array($event['Eps'] ?? '', ['NS', 'Canc.', 'Postp.'], true)) {
+                            $dataevent['Score1'] = $event['Tr1'] ?? null;
+                            $dataevent['Score2'] = $event['Tr2'] ?? null;
+                        }
+
+                    $allEvent[] = [
+                        "Sid"      => $group['Sid'] ?? null,
+                        "Snm"      => $group['Snm'] ?? null,
+                        "Scd"      => $group['Scd'] ?? null,
+                        "Cnm"      => $group['Cnm'] ?? null,
+                        "CnmT"     => $group['CnmT'] ?? null,
+                        "Csnm"     => $group['Csnm'] ?? '',
+                        "Ccd"      => $group['Ccd'] ?? null,
+                        "CompID"   => $group['CompId'] ?? '',
+                        "CompN"    => $group['CompN'] ?? '',
+                        "urlComp"  => ($group['CnmT'] ?? '') . '.' . ($group['Scd'] ?? ''),
+                        "badgeUrl" => $badge_url,
+                        "Events" => $dataevent
+                    ];
+                }
+            }
+
+            if ($type === 'results') {
+                usort($allEvent, function($a, $b){
+                    return $b['Events']['time_start'] <=> $a['Events']['time_start']; // DESC
+                });
+
+                // 🔥 AMBIL 10 TERBARU
+                $allEvent = array_slice($allEvent, 0, 10);
+
+                // 🔥 TIDAK DI GROUPING
+                return response()->json([
+                    'code' => 200,
+                    'message' => 'success',
+                    'data' => $allEvent
+                ]);
+            }
+
+            usort($allEvent, function($a, $b){
+                return $a['Events']['time_start'] <=> $b['Events']['time_start'];
+            });
+
+           $grouped = [];
+
+           foreach ($allEvent as $item) {
+            $lastIndex = count($grouped) - 1;
+
+            if ($lastIndex >= 0 && $grouped[$lastIndex]['Sid'] == $item['Sid']) {
+                $grouped[$lastIndex]['Events'][] = $item['Events'];
+            } else {
+                $grouped[] = [
+                    'Sid' => $item['Sid'],
+                    'Snm' => $item['Snm'],
+                    'Scd' => $item['Scd'],
+                    "Cnm" => $item["Cnm"],
+                    "CnmT" => $item["CnmT"],
+                    "Csnm" => $item["Csnm"],
+                    "Ccd" => $item["Ccd"],
+                    "CompID" => $item["CompID"],
+                    "CompN" => $item["CompN"],
+                    "urlComp" => $item["urlComp"],
+                    'badgeUrl' => $item['badgeUrl'],
+                    "Events" => [$item['Events']]
+                ];
+            }
+           }
+        }
+    
+        return response()->json([
+            'code' => 200,
+            'message' => 'success',
+            'data' => $grouped
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'code' => 500,
+            'message' => 'Internal server error',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
 
 private function hitungPersen($bagian, $total)
 {
