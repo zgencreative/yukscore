@@ -1554,12 +1554,13 @@ public function getMatchFavorite(Request $request){
         $img_team      = 'https://lsm-static-prod.lsmedia1.com/medium/';
         $default_img   = url('img/default_team.png');
         $default_badge = url('img/friendlist.jpg');
+        $buildId = $this->getBuildId();
 
         foreach ($teams as $club) {
             $slug = Str::slug($club['NMTeam']);
             $id = $club["IDTeam"];
 
-            $url = "https://www.livescore.com/_next/data/3E4-wCB_yzP84ycgV4U_F/en/football/team/{$slug}/{$id}/{$type}.json";
+            $url = "https://www.livescore.com/_next/data/{$buildId}/en/football/team/{$slug}/{$id}/{$type}.json";
             $response = Http::get($url);
             $res = $response->json();
             $groups = $res['pageProps']['initialData']['eventsByMatchType'];
@@ -1680,6 +1681,23 @@ private function hitungPersen($bagian, $total)
 {
     if ($total == 0 || $bagian == 0) return 0.0;
     return round(($bagian / $total) * 100, 2);
+}
+
+function getBuildId()
+{
+    $url = "https://www.livescore.com/en/football/team/manchester-united/2810/fixtures/";
+
+    $html = Http::get($url)->body();
+
+    preg_match('/<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/s', $html, $matches);
+
+    if (!isset($matches[1])) {
+        throw new \Exception("Build ID tidak ditemukan");
+    }
+
+    $json = json_decode($matches[1], true);
+
+    return $json['buildId'] ?? null;
 }
 
 }
