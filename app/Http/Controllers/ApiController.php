@@ -14,6 +14,31 @@ use Illuminate\Http\JsonResponse;
 
 class ApiController extends Controller
 {
+    private function getCategoryCode($compN, $snm, $ccd, $scd)
+    {
+        if ($compN !== '' && $snm !== '' && $compN === $snm) {
+            return $scd;
+        }
+        return $ccd;
+    }
+
+    private function getCustomBadgeUrl($code, $defaultUrl)
+    {
+        if ($code === 'premier-league') {
+            return 'https://yuksports.com/upload/icon/sepak-bola/logoliga-02.png';
+        } else if ($code === 'champions-league') {
+            return 'https://yuksports.com/upload/icon/sepak-bola/logoliga-07.png';
+        }
+        return $defaultUrl;
+    }
+
+    private function getCustomImgTeam($nmTeam, $defaultUrl)
+    {
+        if ($nmTeam === 'Tottenham Hotspur') {
+            return 'https://upload.wikimedia.org/wikipedia/sco/thumb/b/b4/Tottenham_Hotspur.svg/330px-Tottenham_Hotspur.svg.png?_=20170428001911';
+        }
+        return $defaultUrl;
+    }
     public function detailCountry($country)
     {
         $img_badge = 'https://static.lsmedia1.com/competition/high/';
@@ -35,9 +60,11 @@ class ApiController extends Controller
 
             if (isset($res['Stages'])) {
                 foreach ($res['Stages'] as $stage) {
+                    $code = $this->getCategoryCode($stage['CompN'] ?? '', $stage['Snm'] ?? '', $stage['Ccd'] ?? '', $stage['Scd'] ?? '');
                     $badge_url = isset($stage['badgeUrl'])
                         ? $img_badge . $stage['badgeUrl']
-                        : "https://static.lsmedia1.com/i2/fh/" . ($stage['Ccd'] ?? '') . ".jpg";
+                        : "https://static.lsmedia1.com/i2/fh/" . $code . ".jpg";
+                    $badge_url = $this->getCustomBadgeUrl($code, $badge_url);
 
                     $existing_snm = array_column($data, 'CompN');
 
@@ -100,13 +127,15 @@ class ApiController extends Controller
             ];
 
             foreach ($data['Stages'] ?? [] as $stage_data) {
+                $code = $this->getCategoryCode($stage_data['CompN'] ?? '', $stage_data['Snm'] ?? '', $stage_data['Ccd'] ?? '', $stage_data['Scd'] ?? '');
                 $badge_url = (str_contains($stage_data['Snm'] ?? '', 'Friendlies'))
                     ? $default_badge
                     : (
                         !empty($stage_data['badgeUrl'])
                             ? $img_badge . $stage_data['badgeUrl']
-                            : "https://static.lsmedia1.com/i2/fh/" . ($stage_data['Ccd'] ?? '') . ".jpg"
+                            : "https://static.lsmedia1.com/i2/fh/" . $code . ".jpg"
                     );
+                $badge_url = $this->getCustomBadgeUrl($code, $badge_url);
 
                 $stage = [
                     "Sid"     => $stage_data['Sid'] ?? null,
@@ -132,12 +161,12 @@ class ApiController extends Controller
                         'Team1'       => [
                             'NMTeam' => $event_data['T1'][0]['Nm'] ?? '',
                             'IDTeam' => $event_data['T1'][0]['ID'] ?? '',
-                            'IMGTeam'=> $team1_img ? $img_team . $team1_img : $default_img,
+                            'IMGTeam'=> $this->getCustomImgTeam($event_data['T1'][0]['Nm'] ?? '', $team1_img ? $img_team . $team1_img : $default_img),
                         ],
                         'Team2'       => [
                             'NMTeam' => $event_data['T2'][0]['Nm'] ?? '',
                             'IDTeam' => $event_data['T2'][0]['ID'] ?? '',
-                            'IMGTeam'=> $team2_img ? $img_team . $team2_img : $default_img,
+                            'IMGTeam'=> $this->getCustomImgTeam($event_data['T2'][0]['Nm'] ?? '', $team2_img ? $img_team . $team2_img : $default_img),
                         ],
                         'Status_Match'=> $event_data['Eps'] ?? '',
                         'time_start'  => $event_data['Esd'] ?? ''
@@ -353,7 +382,7 @@ class ApiController extends Controller
                     $data['teams'][] = [
                         'IDTeam'  => $team['ID'] ?? '',
                         'NMTeam'  => $team['Nm'] ?? '',
-                        'IMGTeam' => !empty($team['Img']) ? $img_team . $team['Img'] : $default_team_img,
+                        'IMGTeam' => $this->getCustomImgTeam($team['Nm'] ?? '', !empty($team['Img']) ? $img_team . $team['Img'] : $default_team_img),
                         'CoNm'    => $team['CoNm'] ?? '',
                         'CoId'    => $team['CoId'] ?? '',
                         'Abr'     => $team['Abr'] ?? '',
@@ -363,13 +392,15 @@ class ApiController extends Controller
 
                 // Stages
                 foreach ($responseComp->json()["Stages"] ?? $res['Stages'] ?? [] as $stage) {
+                    $code = $this->getCategoryCode($stage['CompN'] ?? '', $stage['Snm'] ?? '', $stage['Ccd'] ?? '', $stage['Scd'] ?? '');
                     $badge_url = str_contains($stage['Cnm'] ?? '', 'Friendlies')
                         ? $default_badge_img
                         : (
                             !empty($stage['badgeUrl'])
                                 ? $img_badge . $stage['badgeUrl']
-                                : "https://static.lsmedia1.com/i2/fh/" . ($stage['Ccd'] ?? '') . ".jpg"
+                                : "https://static.lsmedia1.com/i2/fh/" . $code . ".jpg"
                         );
+                    $badge_url = $this->getCustomBadgeUrl($code, $badge_url);
 
                     $data['stages'][] = [
                         'Sid'      => $stage['Sid'] ?? '',
@@ -387,13 +418,15 @@ class ApiController extends Controller
 
                 // Categories
                 foreach ($responseCategory->json()["Categories"] ?? $res['Categories'] ?? [] as $category) {
+                    $code = $this->getCategoryCode($category['CompN'] ?? '', $category['Snm'] ?? '', $category['Ccd'] ?? '', $category['Scd'] ?? '');
                     $badge_url = str_contains($category['Cnm'] ?? '', 'Friendlies')
                         ? $default_badge_img
                         : (
                             !empty($category['badgeUrl'])
                                 ? $img_badge . $category['badgeUrl']
-                                : "https://static.lsmedia1.com/i2/fh/" . ($category['Ccd'] ?? '') . ".jpg"
+                                : "https://static.lsmedia1.com/i2/fh/" . $code . ".jpg"
                         );
+                    $badge_url = $this->getCustomBadgeUrl($code, $badge_url);
 
                     $data['categories'][] = [
                         'Cid'      => $category['Cid'] ?? '',
@@ -490,12 +523,12 @@ class ApiController extends Controller
                 'Team1' => [
                     'NMTeam' => $match_data['T1'][0]['Nm'],
                     'IDTeam' => $match_data['T1'][0]['ID'],
-                    'IMGTeam' => isset($match_data['T1'][0]['Img']) ? $img_team . $match_data['T1'][0]['Img'] : $default_img,
+                    'IMGTeam' => $this->getCustomImgTeam($match_data['T1'][0]['Nm'], isset($match_data['T1'][0]['Img']) ? $img_team . $match_data['T1'][0]['Img'] : $default_img),
                 ],
                 'Team2' => [
                     'NMTeam' => $match_data['T2'][0]['Nm'],
                     'IDTeam' => $match_data['T2'][0]['ID'],
-                    'IMGTeam' => isset($match_data['T2'][0]['Img']) ? $img_team . $match_data['T2'][0]['Img'] : $default_img,
+                    'IMGTeam' => $this->getCustomImgTeam($match_data['T2'][0]['Nm'], isset($match_data['T2'][0]['Img']) ? $img_team . $match_data['T2'][0]['Img'] : $default_img),
                 ],
                 'Status_Match' => $match_data['Eps'],
                 'time_start' => $match_data['Esd'],
@@ -783,7 +816,7 @@ class ApiController extends Controller
                 'Snm' => $res['Snm'] ?? '',
                 'Scd' => $res['Scd'] ?? '',
                 'Cnm' => $res['Cnm'] ?? '',
-                'badgeUrl' => $imgBadge . ($res['badgeUrl'] ?? ''),
+                'badgeUrl' => $this->getCustomBadgeUrl($this->getCategoryCode($res['CompN'] ?? '', $res['Snm'] ?? '', $res['Ccd'] ?? '', $res['Scd'] ?? ''), $imgBadge . ($res['badgeUrl'] ?? '')),
                 'CompId' => $res['CompId'] ?? '',
                 'CompN' => $res['CompN'] ?? '',
                 'CompST' => $res['CompST'] ?? '',
@@ -796,7 +829,7 @@ class ApiController extends Controller
                         'rank' => $team['rnk'] ?? '',
                         'teamID' => $team['Tid'] ?? '',
                         'teamNM' => $team['Tnm'] ?? '',
-                        'teamIMG' => $imgTeam . ($team['Img'] ?? ''),
+                        'teamIMG' => $this->getCustomImgTeam($team['Tnm'] ?? '', $imgTeam . ($team['Img'] ?? '')),
                         'p' => $team['pld'] ?? '',
                         'gd' => $team['gd'] ?? '',
                         'pts' => $team['pts'] ?? '',
@@ -912,7 +945,7 @@ class ApiController extends Controller
                 'Snm' => $stages['Snm'] ?? '',
                 'Scd' => $stages['Scd'] ?? '',
                 'Cnm' => $stages['Cnm'] ?? '',
-                'badgeUrl' => $imgBadge . ($stages['badgeUrl'] ?? ''),
+                'badgeUrl' => $this->getCustomBadgeUrl($this->getCategoryCode($stages['CompN'] ?? '', $stages['Snm'] ?? '', $stages['Ccd'] ?? '', $stages['Scd'] ?? ''), $imgBadge . ($stages['badgeUrl'] ?? '')),
                 'CompId' => $stages['CompId'] ?? '',
                 'CompN' => $stages['CompN'] ?? '',
                 'CompST' => $stages['CompST'] ?? '',
@@ -927,12 +960,12 @@ class ApiController extends Controller
                     'Team1' => [
                         'NMTeam' => $eventData['T1'][0]['Nm'] ?? '',
                         'IDTeam' => $eventData['T1'][0]['ID'] ?? '',
-                        'IMGTeam' => $imgTeam . ($eventData['T1'][0]['Img'] ?? '')
+                        'IMGTeam' => $this->getCustomImgTeam($eventData['T1'][0]['Nm'] ?? '', $imgTeam . ($eventData['T1'][0]['Img'] ?? ''))
                     ],
                     'Team2' => [
                         'NMTeam' => $eventData['T2'][0]['Nm'] ?? '',
                         'IDTeam' => $eventData['T2'][0]['ID'] ?? '',
-                        'IMGTeam' => $imgTeam . ($eventData['T2'][0]['Img'] ?? '')
+                        'IMGTeam' => $this->getCustomImgTeam($eventData['T2'][0]['Nm'] ?? '', $imgTeam . ($eventData['T2'][0]['Img'] ?? ''))
                     ],
                     'Status_Match' => $eventData['Eps'],
                     'time_start' => $eventData['Esd']
@@ -952,7 +985,7 @@ class ApiController extends Controller
                         'rank' => $team['rnk'] ?? '',
                         'teamID' => $team['Tid'] ?? '',
                         'teamNM' => $team['Tnm'] ?? '',
-                        'teamIMG' => $imgTeam . ($team['Img'] ?? ''),
+                        'teamIMG' => $this->getCustomImgTeam($team['Tnm'] ?? '', $imgTeam . ($team['Img'] ?? '')),
                         'p' => $team['pld'] ?? '',
                         'gd' => $team['gd'] ?? '',
                         'pts' => $team['pts'] ?? '',
@@ -1000,7 +1033,7 @@ class ApiController extends Controller
         $data = [
             'NMTeam' => $resData['Nm'] ?? '',
             'IDTeam' => $resData['ID'] ?? '',
-            'IMGTeam' => isset($resData['Img']) ? $imgTeam . $resData['Img'] : '/img/default_team.png',
+            'IMGTeam' => $this->getCustomImgTeam($resData['Nm'] ?? '', isset($resData['Img']) ? $imgTeam . $resData['Img'] : '/img/default_team.png'),
             'Abr' => $resData['Abr'] ?? '',
             'CoNm' => $resData['CoNm'] ?? '',
             'CoId' => $resData['CoId'] ?? '',
@@ -1030,13 +1063,13 @@ class ApiController extends Controller
                     'Team1' => [
                         'NMTeam' => $event['T1'][0]['Nm'],
                         'IDTeam' => $event['T1'][0]['ID'],
-                        'IMGTeam' => isset($event['T1'][0]['Img']) ? $imgTeam . $event['T1'][0]['Img'] : '/img/default_team.png',
+                        'IMGTeam' => $this->getCustomImgTeam($event['T1'][0]['Nm'], isset($event['T1'][0]['Img']) ? $imgTeam . $event['T1'][0]['Img'] : '/img/default_team.png'),
                         'Abr' => $event['T1'][0]['Abr']
                     ],
                     'Team2' => [
                         'NMTeam' => $event['T2'][0]['Nm'],
                         'IDTeam' => $event['T2'][0]['ID'],
-                        'IMGTeam' => isset($event['T2'][0]['Img']) ? $imgTeam . $event['T2'][0]['Img'] : '/img/default_team.png',
+                        'IMGTeam' => $this->getCustomImgTeam($event['T2'][0]['Nm'], isset($event['T2'][0]['Img']) ? $imgTeam . $event['T2'][0]['Img'] : '/img/default_team.png'),
                         'Abr' => $event['T2'][0]['Abr']
                     ]
                 ];
@@ -1088,7 +1121,7 @@ class ApiController extends Controller
                 'team1' => [
                     'teamNM' => $team1['Nm'],
                     'teamID' => $team1['ID'],
-                    'teamIMG' => isset($team1['Img']) ? $imgTeam . $team1['Img'] : '/img/default_team.png',
+                    'teamIMG' => $this->getCustomImgTeam($team1['Nm'], isset($team1['Img']) ? $imgTeam . $team1['Img'] : '/img/default_team.png'),
                     'CoNm' => $team1['CoNm'] ?? '',
                     'CoId' => $team1['CoId'] ?? '',
                     'lastMt' => $team1Last->toArray()
@@ -1096,7 +1129,7 @@ class ApiController extends Controller
                 'team2' => [
                     'teamNM' => $team2['Nm'],
                     'teamID' => $team2['ID'],
-                    'teamIMG' => isset($team2['Img']) ? $imgTeam . $team2['Img'] : '/img/default_team.png',
+                    'teamIMG' => $this->getCustomImgTeam($team2['Nm'], isset($team2['Img']) ? $imgTeam . $team2['Img'] : '/img/default_team.png'),
                     'CoNm' => $team2['CoNm'] ?? '',
                     'CoId' => $team2['CoId'] ?? '',
                     'lastMt' => $team2Last->toArray()
@@ -1169,7 +1202,7 @@ public function getPlayerStat($teamId, $eventId = null)
                 'Cnm' => $stage['Cnm'] ?? '',
                 'CompN' => $stage['CompN'] ?? '',
                 'CompST' => $stage['CompST'] ?? '',
-                'badgeUrl' => $stage['badgeUrl'] ?? ''
+                'badgeUrl' => $this->getCustomBadgeUrl($this->getCategoryCode($stage['CompN'] ?? '', $stage['Snm'] ?? '', $stage['Ccd'] ?? '', $stage['Scd'] ?? ''), $stage['badgeUrl'] ?? '')
             ];
         }
     }
@@ -1242,7 +1275,7 @@ public function getTeamSquad($id)
         'teamID' => $res['ID'] ?? '',
         'teamNM' => $res['Nm'] ?? '',
         'CoNm' => $res['CoNm'] ?? '',
-        'teamIMG' => $res['Img'] ?? '',
+        'teamIMG' => $this->getCustomImgTeam($res['Nm'] ?? '', $res['Img'] ?? ''),
         'player' => []
     ];
 
@@ -1292,7 +1325,7 @@ public function getTeamStat($teamId, $eventId = null)
     $datas = [
         'teamNM' => $res['Nm'] ?? '',
         'teamID' => $res['ID'] ?? '',
-        'teamIMG' => $res['Img'] ?? '',
+        'teamIMG' => $this->getCustomImgTeam($res['Nm'] ?? '', $res['Img'] ?? ''),
         'Abr' => $res['Abr'] ?? '',
         'CoNm' => $res['CoNm'] ?? '',
         'CoId' => $res['CoId'] ?? '',
@@ -1320,7 +1353,7 @@ public function getTeamStat($teamId, $eventId = null)
                 'Cnm' => $stage['Cnm'] ?? '',
                 'CompN' => $stage['CompN'] ?? '',
                 'CompST' => $stage['CompST'] ?? '',
-                'badgeUrl' => $stage['badgeUrl'] ?? ''
+                'badgeUrl' => $this->getCustomBadgeUrl($this->getCategoryCode($stage['CompN'] ?? '', $stage['Snm'] ?? '', $stage['Ccd'] ?? '', $stage['Scd'] ?? ''), $stage['badgeUrl'] ?? '')
             ];
         }
     }
@@ -1377,7 +1410,7 @@ public function getTeamTable($id)
         'Sid' => $res['Sid'] ?? '',
         'Snm' => $res['Snm'] ?? '',
         'Scd' => $res['Scd'] ?? '',
-        'badgeUrl' => $img_badge . ($res['badgeUrl'] ?? ''),
+        'badgeUrl' => $this->getCustomBadgeUrl($this->getCategoryCode($res['CompN'] ?? '', $res['Snm'] ?? '', $res['Ccd'] ?? '', $res['Scd'] ?? ''), $img_badge . ($res['badgeUrl'] ?? '')),
         'CompId' => $res['CompId'] ?? '',
         'CompN' => $res['CompN'] ?? '',
         'CompST' => $res['CompST'] ?? '',
@@ -1391,7 +1424,7 @@ public function getTeamTable($id)
             'rank' => $team['rnk'] ?? '',
             'teamID' => $team['Tid'] ?? '',
             'teamNM' => $team['Tnm'] ?? '',
-            'teamIMG' => $img_team . ($team['Img'] ?? ''),
+            'teamIMG' => $this->getCustomImgTeam($team['Tnm'] ?? '', $img_team . ($team['Img'] ?? '')),
             'p' => $team['pld'] ?? '',
             'gd' => $team['gd'] ?? '',
             'pts' => $team['pts'] ?? '',
@@ -1567,13 +1600,15 @@ public function getMatchFavorite(Request $request){
 
             foreach ($groups as $group) {
                 foreach ($group['Events'] ?? [] as $event) {
+                    $code = $this->getCategoryCode($group['CompN'] ?? '', $group['Snm'] ?? '', $group['Ccd'] ?? '', $group['Scd'] ?? '');
                     $badge_url = (str_contains($group['Snm'] ?? '', 'Friendlies'))
                         ? $default_badge
                         : (
                             !empty($group['badgeUrl'])
                                 ? $img_badge . $group['badgeUrl']
-                                : "https://static.lsmedia1.com/i2/fh/" . ($group['Ccd'] ?? '') . ".jpg"
+                                : "https://static.lsmedia1.com/i2/fh/" . $code . ".jpg"
                         );
+                    $badge_url = $this->getCustomBadgeUrl($code, $badge_url);
 
                     $team1_img = $event['T1'][0]['Img'] ?? null;
                     $team2_img = $event['T2'][0]['Img'] ?? null;
@@ -1583,12 +1618,12 @@ public function getMatchFavorite(Request $request){
                             'Team1'        => [
                                 'NMTeam'  => $event['T1'][0]['Nm'] ?? '',
                                 'IDTeam'  => $event['T1'][0]['ID'] ?? '',
-                                'IMGTeam' => $team1_img ? $img_team . $team1_img : $default_img,
+                                'IMGTeam' => $this->getCustomImgTeam($event['T1'][0]['Nm'] ?? '', $team1_img ? $img_team . $team1_img : $default_img),
                             ],
                             'Team2'        => [
                                 'NMTeam'  => $event['T2'][0]['Nm'] ?? '',
                                 'IDTeam'  => $event['T2'][0]['ID'] ?? '',
-                                'IMGTeam' => $team2_img ? $img_team . $team2_img : $default_img,
+                                'IMGTeam' => $this->getCustomImgTeam($event['T2'][0]['Nm'] ?? '', $team2_img ? $img_team . $team2_img : $default_img),
                             ],
                             'Status_Match' => $event['Eps'] ?? '',
                             'time_start'   => $event['Esd'] ?? '',
